@@ -79,9 +79,62 @@ dotnet test
 **If FAIL:** [Specific items that must be fixed]
 ```
 
+## E2E Verification (Per Anthropic Best Practices)
+
+Per Anthropic: "Agents need prompting to perform end-to-end browser testing...
+use browser automation tools; test as end-users would."
+
+### For API Stories
+
+Always verify endpoints work end-to-end, not just unit tests:
+
+```bash
+# Start test server (if needed)
+dotnet run --project src/Api &
+
+# Test endpoints with curl
+curl -X GET http://localhost:5000/api/health
+curl -X POST http://localhost:5000/api/endpoint \
+  -H "Content-Type: application/json" \
+  -d '{"field": "value"}'
+```
+
+### API Verification Checklist
+
+- [ ] Endpoint returns correct status code (200, 201, 400, 404, etc.)
+- [ ] Response body matches expected schema
+- [ ] Error responses include proper error messages
+- [ ] Authentication/authorization enforced
+- [ ] Validation rejects invalid input
+- [ ] Happy path works end-to-end
+
+### For UI Stories (if applicable)
+
+Use browser automation for visual verification:
+
+```bash
+# Run E2E tests (Playwright, Cypress, etc.)
+npx playwright test tests/e2e/
+```
+
+### E2E Test Report Section
+
+Add to your report when E2E testing is performed:
+
+```markdown
+### E2E Verification
+
+| Endpoint/Feature | Method | Status | Notes |
+|-----------------|--------|--------|-------|
+| `/api/resource` | GET | PASS | Returns 200 with list |
+| `/api/resource` | POST | PASS | Creates and returns 201 |
+| `/api/resource/invalid` | GET | PASS | Returns 404 |
+```
+
 ## When to Escalate
 
 - Critical bug found (data loss, security issue)
 - Test infrastructure broken
 - Unable to verify requirement (unclear criteria)
 - Coverage significantly below target
+- E2E tests reveal integration issues not caught by unit tests

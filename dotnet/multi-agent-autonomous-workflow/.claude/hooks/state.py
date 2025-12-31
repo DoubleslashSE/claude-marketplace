@@ -12,6 +12,7 @@ State file: .claude/workflow-state.json
 """
 
 import json
+import subprocess
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -121,6 +122,104 @@ def get_recent_progress(lines: int = 20) -> List[str]:
         return all_lines[-lines:] if len(all_lines) > lines else all_lines
     except IOError:
         return []
+
+
+# =============================================================================
+# Git Integration for Session Recovery (per Anthropic best practices)
+# =============================================================================
+
+def _run_git_command(args: List[str], cwd: Path = None) -> Optional[str]:
+    """Run a git command and return output, or None on failure."""
+    try:
+        result = subprocess.run(
+            ['git'] + args,
+            cwd=cwd or PROJECT_ROOT,
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+        return None
+    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+        return None
+
+
+def get_git_status() -> Dict[str, Any]:
+    """
+    Get git status for session recovery.
+
+    Per Anthropic best practices: "Read progress notes and git logs...
+    Run basic end-to-end tests before new implementation...
+    This approach prevents agents from rebuilding already-completed work
+    or inheriting broken states."
+    """
+    git_info = {
+        'available': False,
+        'branch': None,
+        'has_uncommitted_changes': False,
+        'uncommitted_files': [],
+        'recent_commits': [],
+        'files_changed_since_main': []
+    }
+
+    # Check if git is available
+    branch = _run_git_command(['rev-parse', '--abbrev-ref', 'HEAD'])
+    if branch is None:
+        return git_info
+
+    git_info['available'] = True
+    git_info['branch'] = branch
+
+    # Check for uncommitted changes
+    status = _run_git_command(['status', '--porcelain'])
+    if status:
+        git_info['has_uncommitted_changes'] = True
+        git_info['uncommitted_files'] = [
+            line.strip() for line in status.split('\n') if line.strip()
+        ][:10]  # Limit to 10 files
+
+    # Get recent commits (last 5)
+    log = _run_git_command([
+        'log', '--oneline', '-5', '--format=%h %s'
+    ])
+    if log:
+        git_info['recent_commits'] = log.split('\n')
+
+    # Get files changed from main/master (for understanding scope of work)
+    for main_branch in ['main', 'master']:
+        diff_stat = _run_git_command([
+            'diff', '--name-only', f'{main_branch}...HEAD'
+        ])
+        if diff_stat:
+            git_info['files_changed_since_main'] = [
+                f for f in diff_stat.split('\n') if f.strip()
+            ][:20]  # Limit to 20 files
+            git_info['main_branch'] = main_branch
+            break
+
+    return git_info
+
+
+def get_last_story_commit() -> Optional[Dict[str, str]]:
+    """Get the last commit that appears to be a story commit."""
+    log = _run_git_command([
+        'log', '--oneline', '-20', '--format=%h|||%s'
+    ])
+    if not log:
+        return None
+
+    # Look for commits with story references (S1, S2, etc.) or common patterns
+    import re
+    for line in log.split('\n'):
+        if '|||' not in line:
+            continue
+        sha, message = line.split('|||', 1)
+        # Match story patterns like "S1:", "Story 1", "feat(S2):", etc.
+        if re.search(r'S\d+|story\s*\d+|feat:|fix:|refactor:', message.lower()):
+            return {'sha': sha, 'message': message}
+
+    return None
 
 
 def clear_progress() -> bool:
@@ -510,15 +609,24 @@ def get_session_recovery_info() -> Dict[str, Any]:
     Get session recovery information per Anthropic best practices.
 
     This enables agents to quickly understand project state when
-    starting fresh sessions.
+    starting fresh sessions. Includes:
+    - Workflow state (stories, current phase, blockers)
+    - Git status (branch, uncommitted changes, recent commits)
+    - Recent progress log entries
+
+    Per Anthropic: "Read progress notes and git logs (typically last 20 commits)...
+    This approach prevents agents from rebuilding already-completed work
+    or inheriting broken states."
     """
     state = load_state()
     recent_progress = get_recent_progress(15)
+    git_status = get_git_status()
 
     if not state:
         return {
             'has_active_workflow': False,
-            'recent_progress': recent_progress
+            'recent_progress': recent_progress,
+            'git': git_status
         }
 
     stories = state.get('stories', [])
@@ -528,6 +636,9 @@ def get_session_recovery_info() -> Dict[str, Any]:
     )
     pending_stories = [s for s in stories if s['status'] == 'pending']
     verified_stories = [s for s in stories if s['status'] == 'verified']
+
+    # Get last story-related commit for context
+    last_story_commit = get_last_story_commit()
 
     return {
         'has_active_workflow': True,
@@ -554,7 +665,9 @@ def get_session_recovery_info() -> Dict[str, Any]:
         },
         'blockers': [b for b in state.get('blockers', []) if not b['resolved']],
         'checkpoint_due': should_checkpoint(),
-        'recent_progress': recent_progress
+        'recent_progress': recent_progress,
+        'git': git_status,
+        'last_story_commit': last_story_commit
     }
 
 
@@ -619,6 +732,7 @@ if __name__ == '__main__':
         print('                                 Set timeout limits (default: story=30, iteration=10)')
         print('  check-timeout <story_id>       Check if story exceeded timeout (exit 3 if exceeded)')
         print('  progress [--lines N]           Show recent progress log entries')
+        print('  git-status                     Show git status for recovery context')
         print('  complete                       Mark workflow as completed')
         print('')
         print('Exit codes: 0=success, 1=error, 2=checkpoint due, 3=blocked')
@@ -770,6 +884,10 @@ if __name__ == '__main__':
             print(f'{story_id}: {result["error"]}')
         else:
             print(f'{story_id}: {result["elapsed_minutes"]}min / {result["max_minutes"]}min')
+
+    elif command == 'git-status':
+        git_info = get_git_status()
+        print(json.dumps(git_info, indent=2))
 
     elif command == 'complete':
         complete_workflow()
