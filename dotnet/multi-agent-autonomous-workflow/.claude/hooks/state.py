@@ -49,7 +49,11 @@ def create_initial_state(goal: str, session_id: str = None) -> Dict[str, Any]:
             'storiesSinceReview': 0,
             'failedAttempts': 0
         },
-        'blockers': []
+        'blockers': [],
+        'timeouts': {
+            'storyMaxMinutes': 30,
+            'iterationMaxMinutes': 10
+        }
     }
 
 
@@ -240,6 +244,65 @@ def record_human_review() -> None:
     save_state(state)
 
 
+def set_timeout(story_minutes: int = None, iteration_minutes: int = None) -> bool:
+    """Set timeout limits for stories and iterations."""
+    state = load_state()
+    if not state:
+        return False
+
+    if 'timeouts' not in state:
+        state['timeouts'] = {'storyMaxMinutes': 30, 'iterationMaxMinutes': 10}
+
+    if story_minutes is not None:
+        state['timeouts']['storyMaxMinutes'] = story_minutes
+    if iteration_minutes is not None:
+        state['timeouts']['iterationMaxMinutes'] = iteration_minutes
+
+    save_state(state)
+    return True
+
+
+def get_timeout() -> Dict[str, int]:
+    """Get current timeout settings."""
+    state = load_state()
+    if not state:
+        return {'storyMaxMinutes': 30, 'iterationMaxMinutes': 10}
+
+    return state.get('timeouts', {'storyMaxMinutes': 30, 'iterationMaxMinutes': 10})
+
+
+def check_story_timeout(story_id: str) -> Dict[str, Any]:
+    """Check if a story has exceeded its timeout.
+
+    Returns dict with:
+    - exceeded: bool
+    - elapsed_minutes: float
+    - max_minutes: int
+    - story_id: str
+    """
+    state = load_state()
+    if not state:
+        return {'exceeded': False, 'error': 'No active workflow'}
+
+    timeouts = state.get('timeouts', {'storyMaxMinutes': 30})
+    max_minutes = timeouts.get('storyMaxMinutes', 30)
+
+    for story in state.get('stories', []):
+        if story['id'] == story_id and story['status'] == 'in_progress':
+            started = datetime.fromisoformat(story['lastUpdated'].replace('Z', '+00:00'))
+            now = datetime.now(timezone.utc)
+            elapsed = (now - started).total_seconds() / 60
+
+            return {
+                'exceeded': elapsed > max_minutes,
+                'elapsed_minutes': round(elapsed, 1),
+                'max_minutes': max_minutes,
+                'story_id': story_id
+            }
+
+    return {'exceeded': False, 'story_id': story_id, 'error': 'Story not in progress'}
+
+
 def complete_workflow() -> bool:
     """Mark the workflow as completed."""
     state = load_state()
@@ -288,7 +351,27 @@ if __name__ == '__main__':
 
     if len(sys.argv) < 2:
         print('Usage: python state.py <command> [args]')
-        print('Commands: init, status, add-story, update-story, add-blocker, add-decision, complete')
+        print('')
+        print('Commands:')
+        print('  init <goal> [--session ID]     Initialize or resume workflow')
+        print('  status                         Show workflow summary')
+        print('  add-story <title> [--size S|M|L|XL] [--ac "criteria"]')
+        print('                                 Add a story to the workflow')
+        print('  update-story <id> <status> [--agent name]')
+        print('                                 Update story status (pending|in_progress|completed|skipped)')
+        print('  add-blocker <desc> [--severity low|medium|high|critical]')
+        print('                                 Add a blocker (pauses workflow)')
+        print('  resolve-blocker <index>        Resolve blocker by index')
+        print('  add-decision <title> <choice> <rationale>')
+        print('                                 Record an architecture decision')
+        print('  checkpoint                     Check if human review is due (exit 2 if due)')
+        print('  record-review                  Record that human review occurred')
+        print('  set-timeout <mins> [--story M] [--iteration M]')
+        print('                                 Set timeout limits (default: story=30, iteration=10)')
+        print('  check-timeout <story_id>       Check if story exceeded timeout (exit 3 if exceeded)')
+        print('  complete                       Mark workflow as completed')
+        print('')
+        print('Exit codes: 0=success, 1=error, 2=checkpoint due, 3=blocked')
         sys.exit(1)
 
     command = sys.argv[1]
@@ -364,6 +447,32 @@ if __name__ == '__main__':
     elif command == 'record-review':
         record_human_review()
         print('Recorded human review checkpoint')
+
+    elif command == 'set-timeout':
+        story_mins = None
+        iteration_mins = None
+        # Parse positional or flag arguments
+        if len(sys.argv) > 2:
+            story_mins = int(sys.argv[2])
+        for i, arg in enumerate(sys.argv):
+            if arg == '--story' and i + 1 < len(sys.argv):
+                story_mins = int(sys.argv[i + 1])
+            elif arg == '--iteration' and i + 1 < len(sys.argv):
+                iteration_mins = int(sys.argv[i + 1])
+        set_timeout(story_mins, iteration_mins)
+        timeouts = get_timeout()
+        print(f'Timeouts set: story={timeouts["storyMaxMinutes"]}min, iteration={timeouts["iterationMaxMinutes"]}min')
+
+    elif command == 'check-timeout':
+        story_id = sys.argv[2] if len(sys.argv) > 2 else 'S1'
+        result = check_story_timeout(story_id)
+        if result.get('exceeded'):
+            print(f'TIMEOUT: {story_id} exceeded {result["max_minutes"]}min (elapsed: {result["elapsed_minutes"]}min)')
+            sys.exit(3)  # Blocked exit code
+        elif result.get('error'):
+            print(f'{story_id}: {result["error"]}')
+        else:
+            print(f'{story_id}: {result["elapsed_minutes"]}min / {result["max_minutes"]}min')
 
     elif command == 'complete':
         complete_workflow()

@@ -115,6 +115,67 @@ WHILE stories remain with status != 'completed':
    ```
 3. Escalate to human with full context
 
+## Escalation Protocol
+
+When escalating to human (after 3+ failed iterations or critical blocker):
+
+### Step 1: Record the Blocker
+```bash
+python .claude/hooks/state.py add-blocker "Detailed description of what's blocking" --severity high
+```
+
+### Step 2: Generate Escalation Summary
+Output a structured escalation report:
+```markdown
+## ESCALATION: Human Review Required
+
+**Story:** S{n} - [Title]
+**Severity:** high/critical
+**Attempts Made:** 3/3
+
+### What Was Tried
+1. [First approach and outcome]
+2. [Second approach and outcome]
+3. [Third approach and outcome]
+
+### Root Cause Analysis
+[Your analysis of why this is failing]
+
+### Blocking Issue
+[Specific technical or requirements issue]
+
+### Recommended Options
+1. [Option A] - [Trade-offs]
+2. [Option B] - [Trade-offs]
+3. [Redesign/split story]
+
+### Files Affected
+- `path/to/file.cs` - [current state]
+```
+
+### Step 3: PAUSE Workflow
+- **DO NOT** continue to the next story
+- **DO NOT** attempt further fixes without human input
+- Wait for human to review and provide direction
+
+### Step 4: Human Resolution
+Human resolves by running one of:
+```bash
+# Option A: Resolve blocker and continue
+python .claude/hooks/state.py resolve-blocker 0
+
+# Option B: Skip story and continue
+python .claude/hooks/state.py update-story S{n} skipped
+
+# Option C: Provide new direction (then resume workflow)
+```
+
+### Exit Codes
+- `0` - Success
+- `1` - Error
+- `2` - Checkpoint due (human review recommended, not blocking)
+- `3` - Blocked (workflow paused, human action required)
+
 ## Progress Reporting (Every 3 Stories or 60 Minutes)
 
 Generate and display:
