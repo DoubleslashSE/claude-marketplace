@@ -19,6 +19,7 @@ from typing import Optional, List, Dict, Any
 
 
 STATE_FILE = Path('.claude/workflow-state.json')
+PROGRESS_FILE = Path('.claude/claude-progress.txt')
 
 
 def generate_workflow_id() -> str:
@@ -78,6 +79,56 @@ def save_state(state: Dict[str, Any]) -> bool:
         return False
 
 
+def log_progress(message: str, story_id: str = None, agent: str = None) -> None:
+    """
+    Log progress to claude-progress.txt for session recovery.
+
+    This file enables agents to quickly understand project state when
+    starting fresh sessions, as recommended by Anthropic best practices.
+    """
+    PROGRESS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    prefix = f"[{timestamp}]"
+    if story_id:
+        prefix += f" [{story_id}]"
+    if agent:
+        prefix += f" [{agent}]"
+
+    entry = f"{prefix} {message}\n"
+
+    try:
+        with open(PROGRESS_FILE, 'a', encoding='utf-8') as f:
+            f.write(entry)
+    except IOError:
+        pass  # Don't block on progress logging failures
+
+
+def get_recent_progress(lines: int = 20) -> List[str]:
+    """Get recent progress entries for session recovery."""
+    if not PROGRESS_FILE.exists():
+        return []
+
+    try:
+        content = PROGRESS_FILE.read_text(encoding='utf-8')
+        all_lines = content.strip().split('\n')
+        return all_lines[-lines:] if len(all_lines) > lines else all_lines
+    except IOError:
+        return []
+
+
+def clear_progress() -> bool:
+    """Clear progress file (typically on workflow completion)."""
+    try:
+        if PROGRESS_FILE.exists():
+            # Archive to progress.old before clearing
+            archive = Path('.claude/claude-progress.old')
+            PROGRESS_FILE.rename(archive)
+        return True
+    except IOError:
+        return False
+
+
 def initialize_workflow(goal: str, session_id: str = None) -> Dict[str, Any]:
     """Initialize a new workflow or return existing if active."""
     existing = load_state()
@@ -85,20 +136,28 @@ def initialize_workflow(goal: str, session_id: str = None) -> Dict[str, Any]:
         # Resume existing workflow
         existing['sessionId'] = session_id or existing.get('sessionId')
         save_state(existing)
+        log_progress(f"RESUMED workflow {existing['workflowId']} - Goal: {existing['goal']}")
         return existing
 
     # Create new workflow
     state = create_initial_state(goal, session_id)
     save_state(state)
+    log_progress(f"STARTED workflow {state['workflowId']} - Goal: {goal}")
     return state
 
 
 def add_story(
     title: str,
     size: str = 'M',
-    acceptance_criteria: List[str] = None
+    acceptance_criteria: List[str] = None,
+    security_sensitive: bool = False
 ) -> str:
-    """Add a new story to the workflow. Returns story ID."""
+    """
+    Add a new story to the workflow. Returns story ID.
+
+    Stories start as 'pending' and must go through 'verified' state
+    before being marked 'completed' (fail-first pattern per Anthropic best practices).
+    """
     state = load_state()
     if not state:
         raise ValueError('No active workflow. Call initialize_workflow first.')
@@ -112,14 +171,22 @@ def add_story(
         'size': size,
         'status': 'pending',
         'acceptanceCriteria': acceptance_criteria or [],
+        'securitySensitive': security_sensitive,
         'assignedAgent': None,
         'attempts': 0,
+        'verificationChecks': {
+            'testsPass': False,
+            'coverageMet': False,
+            'reviewApproved': False,
+            'securityCleared': not security_sensitive  # Auto-clear if not sensitive
+        },
         'createdAt': now_iso(),
         'lastUpdated': now_iso()
     }
 
     state['stories'].append(story)
     save_state(state)
+    log_progress(f"Added story: {title} (size: {size})", story_id=story_id)
     return story_id
 
 
@@ -128,13 +195,30 @@ def update_story_status(
     status: str,
     agent: str = None
 ) -> bool:
-    """Update a story's status."""
+    """
+    Update a story's status.
+
+    Valid statuses (in order):
+    - pending: Not yet started
+    - in_progress: Being implemented
+    - testing: Implementation done, under test verification
+    - review: Tests pass, under code review
+    - verified: All checks passed, ready to mark complete
+    - completed: Fully done and verified
+    - blocked: Cannot proceed
+    - skipped: Intentionally skipped
+    """
+    valid_statuses = ['pending', 'in_progress', 'testing', 'review', 'verified', 'completed', 'blocked', 'skipped']
+    if status not in valid_statuses:
+        return False
+
     state = load_state()
     if not state:
         return False
 
     for story in state['stories']:
         if story['id'] == story_id:
+            old_status = story['status']
             story['status'] = status
             story['lastUpdated'] = now_iso()
             if agent:
@@ -142,14 +226,106 @@ def update_story_status(
             if status == 'in_progress':
                 story['attempts'] = story.get('attempts', 0) + 1
 
-            # Update checkpoint counter
+            # Update checkpoint counter only when fully completed
             if status == 'completed':
-                state['checkpoints']['storiesSinceReview'] += 1
+                # Enforce fail-first: must be verified before completed
+                checks = story.get('verificationChecks', {})
+                if not all([checks.get('testsPass'), checks.get('coverageMet'), checks.get('reviewApproved')]):
+                    # If not all verified, force to verified status first
+                    story['status'] = 'verified'
+                    log_progress(f"Status: {old_status} -> verified (awaiting all checks)", story_id=story_id, agent=agent)
+                else:
+                    story['completedAt'] = now_iso()
+                    state['checkpoints']['storiesSinceReview'] += 1
+                    log_progress(f"COMPLETED - all verification checks passed", story_id=story_id, agent=agent)
+            else:
+                log_progress(f"Status: {old_status} -> {status}", story_id=story_id, agent=agent)
 
             save_state(state)
             return True
 
     return False
+
+
+def update_verification_check(
+    story_id: str,
+    check_name: str,
+    passed: bool,
+    details: str = None
+) -> bool:
+    """
+    Update a verification check for a story (fail-first pattern).
+
+    Check names: testsPass, coverageMet, reviewApproved, securityCleared
+    All checks must pass before a story can be marked completed.
+    """
+    valid_checks = ['testsPass', 'coverageMet', 'reviewApproved', 'securityCleared']
+    if check_name not in valid_checks:
+        return False
+
+    state = load_state()
+    if not state:
+        return False
+
+    for story in state['stories']:
+        if story['id'] == story_id:
+            if 'verificationChecks' not in story:
+                story['verificationChecks'] = {
+                    'testsPass': False,
+                    'coverageMet': False,
+                    'reviewApproved': False,
+                    'securityCleared': not story.get('securitySensitive', False)
+                }
+
+            story['verificationChecks'][check_name] = passed
+            story['lastUpdated'] = now_iso()
+
+            status_str = "PASSED" if passed else "FAILED"
+            detail_str = f" - {details}" if details else ""
+            log_progress(f"Verification {check_name}: {status_str}{detail_str}", story_id=story_id)
+
+            # Check if all verifications passed
+            checks = story['verificationChecks']
+            all_passed = all([
+                checks.get('testsPass'),
+                checks.get('coverageMet'),
+                checks.get('reviewApproved'),
+                checks.get('securityCleared', True)
+            ])
+
+            if all_passed and story['status'] not in ['completed', 'verified']:
+                story['status'] = 'verified'
+                log_progress("All verification checks PASSED - ready for completion", story_id=story_id)
+
+            save_state(state)
+            return True
+
+    return False
+
+
+def get_verification_status(story_id: str) -> Dict[str, Any]:
+    """Get verification status for a story."""
+    state = load_state()
+    if not state:
+        return {'error': 'No active workflow'}
+
+    for story in state['stories']:
+        if story['id'] == story_id:
+            checks = story.get('verificationChecks', {})
+            return {
+                'story_id': story_id,
+                'status': story['status'],
+                'checks': checks,
+                'all_passed': all([
+                    checks.get('testsPass'),
+                    checks.get('coverageMet'),
+                    checks.get('reviewApproved'),
+                    checks.get('securityCleared', True)
+                ]),
+                'pending_checks': [k for k, v in checks.items() if not v]
+            }
+
+    return {'error': f'Story {story_id} not found'}
 
 
 def update_phase(phase: str, agent: str = None) -> bool:
@@ -204,6 +380,7 @@ def add_blocker(description: str, severity: str = 'medium') -> None:
     state['blockers'].append(blocker)
     state['status'] = 'blocked'
     save_state(state)
+    log_progress(f"BLOCKER [{severity.upper()}]: {description}")
 
 
 def resolve_blocker(index: int) -> bool:
@@ -304,7 +481,7 @@ def check_story_timeout(story_id: str) -> Dict[str, Any]:
 
 
 def complete_workflow() -> bool:
-    """Mark the workflow as completed."""
+    """Mark the workflow as completed and archive progress file."""
     state = load_state()
     if not state:
         return False
@@ -312,7 +489,67 @@ def complete_workflow() -> bool:
     state['status'] = 'completed'
     state['completedAt'] = now_iso()
     save_state(state)
+
+    # Log completion and archive progress
+    stories = state.get('stories', [])
+    completed = sum(1 for s in stories if s['status'] == 'completed')
+    log_progress(f"WORKFLOW COMPLETED - {completed}/{len(stories)} stories done")
+    clear_progress()  # Archive progress file
+
     return True
+
+
+def get_session_recovery_info() -> Dict[str, Any]:
+    """
+    Get session recovery information per Anthropic best practices.
+
+    This enables agents to quickly understand project state when
+    starting fresh sessions.
+    """
+    state = load_state()
+    recent_progress = get_recent_progress(15)
+
+    if not state:
+        return {
+            'has_active_workflow': False,
+            'recent_progress': recent_progress
+        }
+
+    stories = state.get('stories', [])
+    current_story = next(
+        (s for s in stories if s['status'] in ['in_progress', 'testing', 'review']),
+        None
+    )
+    pending_stories = [s for s in stories if s['status'] == 'pending']
+    verified_stories = [s for s in stories if s['status'] == 'verified']
+
+    return {
+        'has_active_workflow': True,
+        'workflow_id': state.get('workflowId'),
+        'goal': state.get('goal'),
+        'status': state.get('status'),
+        'current_phase': state.get('currentPhase'),
+        'current_agent': state.get('currentAgent'),
+        'current_story': {
+            'id': current_story['id'],
+            'title': current_story['title'],
+            'status': current_story['status'],
+            'attempts': current_story.get('attempts', 0),
+            'verification': current_story.get('verificationChecks', {})
+        } if current_story else None,
+        'next_pending': pending_stories[0]['title'] if pending_stories else None,
+        'verified_awaiting_completion': [s['id'] for s in verified_stories],
+        'stories_summary': {
+            'total': len(stories),
+            'completed': sum(1 for s in stories if s['status'] == 'completed'),
+            'verified': len(verified_stories),
+            'in_progress': sum(1 for s in stories if s['status'] in ['in_progress', 'testing', 'review']),
+            'pending': len(pending_stories)
+        },
+        'blockers': [b for b in state.get('blockers', []) if not b['resolved']],
+        'checkpoint_due': should_checkpoint(),
+        'recent_progress': recent_progress
+    }
 
 
 def get_workflow_summary() -> Dict[str, Any]:
@@ -355,10 +592,16 @@ if __name__ == '__main__':
         print('Commands:')
         print('  init <goal> [--session ID]     Initialize or resume workflow')
         print('  status                         Show workflow summary')
-        print('  add-story <title> [--size S|M|L|XL] [--ac "criteria"]')
+        print('  recover                        Get session recovery info (for fresh sessions)')
+        print('  add-story <title> [--size S|M|L|XL] [--ac "criteria"] [--security]')
         print('                                 Add a story to the workflow')
         print('  update-story <id> <status> [--agent name]')
-        print('                                 Update story status (pending|in_progress|completed|skipped)')
+        print('                                 Update story status (pending|in_progress|testing|')
+        print('                                 review|verified|completed|blocked|skipped)')
+        print('  verify <story_id> <check> [--passed] [--failed] [--details "msg"]')
+        print('                                 Update verification check (testsPass|coverageMet|')
+        print('                                 reviewApproved|securityCleared)')
+        print('  verify-status <story_id>       Get verification status for a story')
         print('  add-blocker <desc> [--severity low|medium|high|critical]')
         print('                                 Add a blocker (pauses workflow)')
         print('  resolve-blocker <index>        Resolve blocker by index')
@@ -369,6 +612,7 @@ if __name__ == '__main__':
         print('  set-timeout <mins> [--story M] [--iteration M]')
         print('                                 Set timeout limits (default: story=30, iteration=10)')
         print('  check-timeout <story_id>       Check if story exceeded timeout (exit 3 if exceeded)')
+        print('  progress [--lines N]           Show recent progress log entries')
         print('  complete                       Mark workflow as completed')
         print('')
         print('Exit codes: 0=success, 1=error, 2=checkpoint due, 3=blocked')
@@ -391,10 +635,15 @@ if __name__ == '__main__':
         summary = get_workflow_summary()
         print(json.dumps(summary, indent=2))
 
+    elif command == 'recover':
+        recovery = get_session_recovery_info()
+        print(json.dumps(recovery, indent=2))
+
     elif command == 'add-story':
         title = sys.argv[2] if len(sys.argv) > 2 else 'New Story'
         size = 'M'  # Default size
         acceptance_criteria = []
+        security_sensitive = False
 
         # Parse optional arguments
         for i, arg in enumerate(sys.argv):
@@ -402,9 +651,12 @@ if __name__ == '__main__':
                 size = sys.argv[i + 1].upper()
             elif arg == '--ac' and i + 1 < len(sys.argv):
                 acceptance_criteria.append(sys.argv[i + 1])
+            elif arg == '--security':
+                security_sensitive = True
 
-        story_id = add_story(title, size, acceptance_criteria if acceptance_criteria else None)
-        print(f'Added story: {story_id} (size: {size})')
+        story_id = add_story(title, size, acceptance_criteria if acceptance_criteria else None, security_sensitive)
+        security_flag = ' [SECURITY]' if security_sensitive else ''
+        print(f'Added story: {story_id} (size: {size}){security_flag}')
 
     elif command == 'update-story':
         story_id = sys.argv[2] if len(sys.argv) > 2 else 'S1'
@@ -413,8 +665,47 @@ if __name__ == '__main__':
         for i, arg in enumerate(sys.argv):
             if arg == '--agent' and i + 1 < len(sys.argv):
                 agent = sys.argv[i + 1]
-        update_story_status(story_id, status, agent)
-        print(f'Updated {story_id} to {status}')
+        if update_story_status(story_id, status, agent):
+            print(f'Updated {story_id} to {status}')
+        else:
+            print(f'Failed to update {story_id} (invalid status or story not found)')
+            sys.exit(1)
+
+    elif command == 'verify':
+        story_id = sys.argv[2] if len(sys.argv) > 2 else 'S1'
+        check_name = sys.argv[3] if len(sys.argv) > 3 else 'testsPass'
+        passed = True  # Default to passed
+        details = None
+        for i, arg in enumerate(sys.argv):
+            if arg == '--failed':
+                passed = False
+            elif arg == '--passed':
+                passed = True
+            elif arg == '--details' and i + 1 < len(sys.argv):
+                details = sys.argv[i + 1]
+        if update_verification_check(story_id, check_name, passed, details):
+            status = 'PASSED' if passed else 'FAILED'
+            print(f'Verification {check_name} for {story_id}: {status}')
+        else:
+            print(f'Failed to update verification (invalid check or story not found)')
+            sys.exit(1)
+
+    elif command == 'verify-status':
+        story_id = sys.argv[2] if len(sys.argv) > 2 else 'S1'
+        result = get_verification_status(story_id)
+        print(json.dumps(result, indent=2))
+
+    elif command == 'progress':
+        lines = 20
+        for i, arg in enumerate(sys.argv):
+            if arg == '--lines' and i + 1 < len(sys.argv):
+                lines = int(sys.argv[i + 1])
+        entries = get_recent_progress(lines)
+        if entries:
+            for entry in entries:
+                print(entry)
+        else:
+            print('No progress entries found')
 
     elif command == 'add-blocker':
         description = sys.argv[2] if len(sys.argv) > 2 else 'Unknown blocker'

@@ -24,10 +24,34 @@ This workflow is designed to run for **minutes to hours** without human interven
 4. **Self-correct** - Use verification results to guide corrections
 5. **Escalate only when truly blocked** - Exhaust retry options first
 
-## Initialization
+## Session Recovery Protocol (Run on EVERY Session Start)
+
+Per Anthropic best practices, run these steps at the start of each session to quickly understand project state:
 
 ```bash
-# Initialize workflow state (run this first)
+# Step 1: Verify working directory
+pwd
+
+# Step 2: Check for existing workflow and get recovery info
+python .claude/hooks/state.py recover
+
+# Step 3: Read recent progress (if resuming)
+python .claude/hooks/state.py progress --lines 15
+
+# Step 4: Check git history for recent changes
+git log --oneline -5
+```
+
+**Based on recovery info:**
+- If `has_active_workflow: true` → Resume from `current_story` or next pending
+- If `verified_awaiting_completion` has items → Complete those stories first
+- If `blockers` exist → Address or escalate before continuing
+- If `checkpoint_due: true` → Pause for human review
+
+## Initialization (New Workflows Only)
+
+```bash
+# Initialize workflow state (run this for NEW workflows only)
 python .claude/hooks/state.py init "$ARGUMENTS"
 ```
 
@@ -36,17 +60,25 @@ python .claude/hooks/state.py init "$ARGUMENTS"
 1. Invoke `analyst` subagent with the goal
 2. For each story returned, add to state:
    ```bash
+   # Regular story
    python .claude/hooks/state.py add-story "Story title" --size M
+
+   # Security-sensitive story (auth, payments, user data)
+   python .claude/hooks/state.py add-story "Story title" --size M --security
    ```
 3. Invoke `architect` for technical design
 4. **Quality Gate G1:** Verify design is complete before proceeding
 
 ## Phase 2: Story Execution Loop (ITERATE UNTIL ALL COMPLETE)
 
+Uses fail-first pattern: stories must pass ALL verification checks before completion.
+
 ```
 WHILE stories remain with status != 'completed':
 
-    1. SELECT next pending story (or retry failed story if attempts < 3)
+    1. SELECT next pending/verified story (verified stories ready for completion)
+       - If verified stories exist → complete them first
+       - Otherwise → select next pending story
 
     2. UPDATE state:
        python .claude/hooks/state.py update-story S{n} in_progress
@@ -54,23 +86,39 @@ WHILE stories remain with status != 'completed':
     3. INVOKE developer with story + design context
        - If build/tests FAIL → analyze error, retry developer (max 3 attempts)
        - If 3 failures → invoke architect for redesign, then retry
+       - On success:
+         python .claude/hooks/state.py update-story S{n} testing
 
     4. INVOKE tester to verify implementation
-       - If FAIL → send failure details back to developer
-       - REPEAT developer↔tester loop (max 3 iterations)
+       - If FAIL → record failure and loop back to developer:
+         python .claude/hooks/state.py verify S{n} testsPass --failed --details "reason"
+       - If PASS → record success:
+         python .claude/hooks/state.py verify S{n} testsPass --passed
+         python .claude/hooks/state.py verify S{n} coverageMet --passed --details "X%"
+         python .claude/hooks/state.py update-story S{n} review
 
     5. INVOKE reviewer for code review
-       - If CHANGES_REQUESTED → send feedback to developer, loop back to step 3
+       - If CHANGES_REQUESTED → record and loop back:
+         python .claude/hooks/state.py verify S{n} reviewApproved --failed
+       - If APPROVED → record success:
+         python .claude/hooks/state.py verify S{n} reviewApproved --passed
 
     6. IF story is [SECURITY-SENSITIVE]:
        INVOKE security subagent
-       - If NEEDS_REMEDIATION → loop back to step 3
+       - If NEEDS_REMEDIATION → record and loop back:
+         python .claude/hooks/state.py verify S{n} securityCleared --failed
+       - If SECURE → record success:
+         python .claude/hooks/state.py verify S{n} securityCleared --passed
 
-    7. UPDATE state:
-       python .claude/hooks/state.py update-story S{n} completed
+    7. CHECK verification status:
+       python .claude/hooks/state.py verify-status S{n}
+       - If all_passed: true → complete the story:
+         python .claude/hooks/state.py update-story S{n} completed
+       - If pending_checks exist → address those checks first
 
     8. CHECK checkpoint:
-       - If 5 stories completed since last review → pause for human checkpoint
+       python .claude/hooks/state.py checkpoint
+       - If exit code 2 → pause for human checkpoint
        - Otherwise → continue to next story
 ```
 
@@ -206,11 +254,29 @@ Generate and display:
 
 ## Important Guidelines
 
-- **ALWAYS** update state after completing each story
+- **ALWAYS** run session recovery protocol at the start of each session
+- **ALWAYS** update verification checks before marking stories complete
+- **NEVER** mark a story 'completed' without all verification checks passing
 - **NEVER** leave a story in 'in_progress' state indefinitely
 - Use the Task tool to invoke subagents with FULL context
 - Each subagent returns structured output - parse it to determine next action
 - Escalate to human only at checkpoints OR on true blockers (after 3+ retries)
 - Mark stories as `[SECURITY-SENSITIVE]` if they involve auth, payments, or user data
 
-Begin by initializing workflow state and invoking the analyst subagent.
+## Quick Reference - Verification Commands
+
+```bash
+# Check verification status
+python .claude/hooks/state.py verify-status S{n}
+
+# Update checks (use --passed or --failed)
+python .claude/hooks/state.py verify S{n} testsPass --passed
+python .claude/hooks/state.py verify S{n} coverageMet --passed --details "85%"
+python .claude/hooks/state.py verify S{n} reviewApproved --passed
+python .claude/hooks/state.py verify S{n} securityCleared --passed
+
+# View progress log
+python .claude/hooks/state.py progress
+```
+
+Begin by running the session recovery protocol, then initialize workflow state if needed and invoke the analyst subagent.

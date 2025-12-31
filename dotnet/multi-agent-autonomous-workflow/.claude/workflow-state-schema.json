@@ -73,8 +73,39 @@
           },
           "status": {
             "type": "string",
-            "enum": ["pending", "in_progress", "testing", "review", "completed", "blocked"],
-            "description": "Story status"
+            "enum": ["pending", "in_progress", "testing", "review", "verified", "completed", "blocked", "skipped"],
+            "description": "Story status. Must reach 'verified' before 'completed' (fail-first pattern)"
+          },
+          "securitySensitive": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether this story requires security review"
+          },
+          "verificationChecks": {
+            "type": "object",
+            "description": "Fail-first verification checks - all must pass before completion",
+            "properties": {
+              "testsPass": {
+                "type": "boolean",
+                "default": false,
+                "description": "All tests pass"
+              },
+              "coverageMet": {
+                "type": "boolean",
+                "default": false,
+                "description": "Coverage threshold met for story size"
+              },
+              "reviewApproved": {
+                "type": "boolean",
+                "default": false,
+                "description": "Code review approved"
+              },
+              "securityCleared": {
+                "type": "boolean",
+                "default": true,
+                "description": "Security review passed (auto-true if not security-sensitive)"
+              }
+            }
           },
           "acceptanceCriteria": {
             "type": "array",

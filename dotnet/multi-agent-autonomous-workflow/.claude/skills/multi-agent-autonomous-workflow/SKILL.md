@@ -114,6 +114,25 @@ for story in stories:
 | G3 | After test | Coverage threshold met | Add tests, retry |
 | G4 | If security | Security scan passes | Remediate, retry |
 
+## Fail-First Verification Pattern
+
+Per Anthropic best practices, stories must pass ALL verification checks before completion:
+
+```
+Story Status Flow:
+pending → in_progress → testing → review → verified → completed
+                ↑                              │
+                └──────── (on failure) ────────┘
+
+Verification Checks (all must pass):
+├── testsPass      - All tests pass
+├── coverageMet    - Coverage threshold met (S=70%, M=80%, L=85%, XL=90%)
+├── reviewApproved - Code review approved
+└── securityCleared - Security review passed (if security-sensitive)
+```
+
+Stories cannot be marked `completed` until reaching `verified` status with all checks passed.
+
 ## Iteration Control
 
 ### Maximum Retries
@@ -169,16 +188,32 @@ Drop from context:
 ## State Management
 
 ```bash
-# Initialize
+# Initialize or resume workflow
 python .claude/hooks/state.py init "Goal description"
 
-# Track stories
+# Session recovery (run at start of each session)
+python .claude/hooks/state.py recover
+
+# Track stories (use --security for auth/payments/user data)
 python .claude/hooks/state.py add-story "Story title" --size M
+python .claude/hooks/state.py add-story "Auth story" --size L --security
+
+# Update story status
 python .claude/hooks/state.py update-story S1 in_progress
+python .claude/hooks/state.py update-story S1 testing
+python .claude/hooks/state.py update-story S1 review
 python .claude/hooks/state.py update-story S1 completed
 
-# Monitor
+# Verification checks (fail-first pattern)
+python .claude/hooks/state.py verify S1 testsPass --passed
+python .claude/hooks/state.py verify S1 coverageMet --passed --details "85%"
+python .claude/hooks/state.py verify S1 reviewApproved --passed
+python .claude/hooks/state.py verify S1 securityCleared --passed
+python .claude/hooks/state.py verify-status S1
+
+# Monitor progress
 python .claude/hooks/state.py status
+python .claude/hooks/state.py progress --lines 20
 
 # Complete
 python .claude/hooks/state.py complete
