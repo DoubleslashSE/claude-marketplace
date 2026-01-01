@@ -21,6 +21,33 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/stop.py"
+          }
+        ]
+      }
     ]
+  },
+  "workflow": {
+    "maxIterations": 100,
+    "completionMarkers": [
+      "WORKFLOW_COMPLETE",
+      "## WORKFLOW_COMPLETE"
+    ],
+    "clarifyingQuestions": {
+      "preAnalysis": true,
+      "prePlan": true
+    },
+    "longRunning": {
+      "enabled": true,
+      "progressReportIntervalMinutes": 30,
+      "checkpointIntervalStories": 3
+    }
   }
 }
