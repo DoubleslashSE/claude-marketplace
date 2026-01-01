@@ -210,7 +210,24 @@ Before I begin analyzing your request, I need to clarify:
 
 **Always offer:** "Proceed with my best judgment" as an option.
 
+**Question Timeout Behavior:**
+- If no response within 5 minutes in autonomous mode: proceed with best judgment
+- Log the assumed answers: `python .claude/core/state.py add-clarification "Question" "Assumed: best judgment" --phase pre-analysis --category scope`
+- Always persist clarifications for session recovery
+
 **Wait for user response before continuing to Step 1.2.**
+
+### Step 1.1.1: Persist Clarifications
+
+After receiving user answers, **ALWAYS persist them**:
+
+```bash
+# For each question answered:
+python .claude/core/state.py add-clarification "What payment provider?" "Stripe" --phase pre-analysis --category technical
+python .claude/core/state.py add-clarification "Real-time tech?" "SignalR" --phase pre-analysis --category technical
+```
+
+This ensures clarifications survive session restarts.
 
 ### Step 1.2: Initialize Workflow State
 
@@ -310,6 +327,74 @@ This is the **main execution loop**. It runs until **ALL stories are completed**
 2. No story can be marked complete until ALL verification checks pass
 3. The loop continues until there are no more incomplete stories
 4. The Stop hook will block exit if any stories remain incomplete
+5. **TDD phases must be followed: RED → GREEN → REFACTOR → VERIFY**
+6. **Failures must be categorized for intelligent retry decisions**
+
+### TDD Phase Enforcement
+
+Each story MUST follow the TDD cycle. Track phases explicitly:
+
+```bash
+# 1. RED: Write failing test FIRST
+python .claude/core/state.py tdd-phase S1 red
+# Developer writes test that fails
+
+# 2. GREEN: Minimum code to pass
+python .claude/core/state.py tdd-phase S1 green
+# Developer implements minimum code
+
+# 3. REFACTOR: Clean up (optional for small changes)
+python .claude/core/state.py tdd-phase S1 refactor
+# Developer refactors without changing behavior
+
+# 4. VERIFY: Run all checks
+python .claude/core/state.py tdd-phase S1 verify
+# All gates must pass
+```
+
+**Before moving to GREEN phase, validate:**
+```bash
+python .claude/core/state.py tdd-validate S1 green
+# Returns: {"valid": true} or {"valid": false, "expected": "red"}
+```
+
+**If developer tries to write implementation before tests:**
+```
+STOP. TDD violation detected.
+Current phase: none
+Expected: red (write failing test first)
+
+Developer must write a failing test before implementation.
+```
+
+### Failure Categorization
+
+When a gate fails, **categorize the failure** for intelligent retry:
+
+```bash
+# Auto-categorize based on error message:
+python .claude/core/state.py add-failure S1 "Connection refused: database not available"
+# Output: Added failure: F1 [infra]
+
+# Or explicitly categorize:
+python .claude/core/state.py add-failure S1 "API key not configured" --category external
+```
+
+**Categories:**
+| Category | Description | Retry Strategy |
+|----------|-------------|----------------|
+| `code` | Bug in implementation | Standard retry |
+| `test` | Test itself is wrong | Fix test, retry |
+| `infra` | DB, network, filesystem | Retry with backoff |
+| `external` | API keys, external services | **ESCALATE** - needs human |
+| `timeout` | Operation timed out | Retry with backoff |
+
+**Get retry recommendation before retrying:**
+```bash
+python .claude/core/state.py retry-recommendation S1
+# Returns: {"should_retry": true, "backoff_seconds": 30}
+# OR: {"should_retry": false, "escalate": true, "reason": "External service failures"}
+```
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
@@ -416,7 +501,83 @@ When retrying development, ALWAYS provide this context to the developer:
 | coverageMet | {PASS/PENDING} |
 | reviewApproved | {PASS/PENDING} |
 | securityCleared | {PASS/PENDING/N/A} |
+
+### Retry Recommendation:
+{Output from: python .claude/core/state.py retry-recommendation {story_id}}
 ```
+
+### Reviewer Severity Levels
+
+When the **Reviewer Agent** identifies issues, they MUST be categorized by severity:
+
+```markdown
+## Code Review Results
+
+### BLOCKING Issues (Must Fix)
+{Issues that block completion - security, correctness, architecture violations}
+- **[BLOCKING]** SQL injection vulnerability in UserRepository.cs:45
+- **[BLOCKING]** Missing null check causes crash in PaymentService
+
+### SUGGESTIONS (Recommended)
+{Improvements that should be made but don't block completion}
+- **[SUGGESTION]** Consider using MediatR pipeline for validation
+- **[SUGGESTION]** Extract magic number to named constant
+
+### INFO (For Future Reference)
+{Non-actionable observations}
+- **[INFO]** This pattern could be simplified in future refactoring
+- **[INFO]** Consider adding integration tests for edge cases
+```
+
+**Retry Logic Based on Severity:**
+- **BLOCKING issues found:** MUST retry, add to `previous_failures`
+- **Only SUGGESTIONS:** Mark review approved, note suggestions for developer
+- **Only INFO:** Mark review approved, continue
+
+### External Dependency Detection
+
+Before development, check for **external dependencies** that may require special handling:
+
+```bash
+# Check if story requires external services
+# Look for keywords in acceptance criteria and design
+```
+
+**External Dependency Types:**
+
+| Type | Detection Keywords | Handling |
+|------|-------------------|----------|
+| **Payment APIs** | stripe, paypal, payment, checkout | Use mock/sandbox in tests |
+| **Email Services** | email, smtp, sendgrid, mailgun | Mock email sending |
+| **SMS/Push** | sms, twilio, push notification | Mock notification service |
+| **OAuth/SSO** | oauth, sso, google auth, azure ad | Use test credentials |
+| **Cloud Storage** | s3, azure blob, gcs, file upload | Use local storage mock |
+| **External APIs** | api key, third-party, integration | Create mock responses |
+
+**When external dependency detected:**
+
+1. **Log dependency:**
+   ```bash
+   python .claude/core/state.py add-clarification "External dependency: Stripe API" "Using sandbox mode for tests" --phase development --category external
+   ```
+
+2. **Add mock strategy to developer context:**
+   ```markdown
+   ## External Dependencies
+
+   This story requires: Stripe Payment API
+
+   **Test Strategy:**
+   - Use Stripe test mode API keys
+   - Mock Stripe responses for unit tests
+   - Mark AC requiring live Stripe as "MANUAL_VERIFICATION_REQUIRED"
+   ```
+
+3. **If no mock possible:**
+   ```bash
+   python .claude/core/state.py add-blocker "Stripe API credentials not available for testing" --severity high
+   # Escalate to user
+   ```
 
 ### Progress Reports
 
@@ -454,6 +615,72 @@ Generate a progress report every **3 completed stories** OR every **30 minutes**
 ### Next Steps:
 1. {Current action}
 2. {Next story after this}
+```
+
+---
+
+## Phase 2.5: Lint Fix Loop (Non-Story Fixes)
+
+When **Gate G7 fails on lint** but build/tests pass, enter this special loop:
+
+**Purpose:** Fix lint/formatting issues without creating a new story iteration.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           LINT FIX LOOP                                          │
+│                                                                                  │
+│   Gate G7 fails on lint (build + test passed)                                   │
+│                                                                                  │
+│   while (lint_fails AND attempts < 3):                                          │
+│       1. Get lint errors:                                                       │
+│          LINT_CMD=$(python .claude/core/platform.py get-command lint)           │
+│          eval "$LINT_CMD" 2>&1 | tee lint_errors.txt                            │
+│                                                                                  │
+│       2. Fix lint issues (DO NOT change logic):                                 │
+│          - Formatting only                                                      │
+│          - No new features                                                      │
+│          - No refactoring                                                       │
+│                                                                                  │
+│       3. Re-run verification:                                                   │
+│          - Build (should still pass)                                            │
+│          - Test (should still pass)                                             │
+│          - Lint (check if fixed)                                                │
+│                                                                                  │
+│       4. If lint passes: Exit loop, continue to Phase 3                         │
+│          If lint fails: Increment attempts, retry                               │
+│                                                                                  │
+│   if (attempts >= 3):                                                           │
+│       Log blocker: "Unable to fix lint issues after 3 attempts"                 │
+│       Continue to Phase 3 anyway (lint is non-blocking for PR)                  │
+│       Note in PR: "Lint issues remain - manual review needed"                   │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Key Rules for Lint Fix Loop:**
+1. **DO NOT** modify any logic or behavior
+2. **DO NOT** add new tests or features
+3. **ONLY** fix formatting, whitespace, import order, etc.
+4. **Verify tests still pass** after each fix
+5. **If tests break:** Revert lint fix, continue with lint warnings
+
+```bash
+# Run lint fix loop
+python .claude/core/state.py update-phase lint-fix
+
+# Get lint command and run
+LINT_CMD=$(python .claude/core/platform.py get-command lint)
+eval "$LINT_CMD" 2>&1
+
+# If platform has auto-fix:
+LINT_FIX=$(python .claude/core/platform.py get-command lintFix 2>/dev/null || echo "")
+if [ -n "$LINT_FIX" ]; then
+    eval "$LINT_FIX"
+fi
+
+# Verify tests still pass after lint fix
+TEST_CMD=$(python .claude/core/platform.py get-command test)
+eval "$TEST_CMD"
 ```
 
 ---

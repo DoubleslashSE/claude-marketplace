@@ -110,22 +110,34 @@ def create_initial_state(goal: str, session_id: str = None) -> Dict[str, Any]:
         'totalIterations': 0,
         'stories': [],
         'decisions': [],
+        'clarifications': [],  # Persisted user clarification answers
+        'failures': [],  # Categorized failure log
         'checkpoints': {
             'lastHumanReview': now_iso(),
             'storiesSinceReview': 0,
             'lastProgressReport': now_iso(),
-            'storiesSinceReport': 0
+            'storiesSinceReport': 0,
+            'lastTimeCheck': now_iso()
         },
         'blockers': [],
         'metrics': {
             'storiesCompleted': 0,
             'totalAttempts': 0,
-            'failedVerifications': 0
+            'failedVerifications': 0,
+            'failuresByCategory': {
+                'code': 0,
+                'test': 0,
+                'infra': 0,
+                'external': 0,
+                'timeout': 0
+            }
         },
         'timeouts': {
             'storyMaxMinutes': 30,
-            'iterationMaxMinutes': 10
-        }
+            'iterationMaxMinutes': 10,
+            'questionTimeoutMinutes': 5
+        },
+        'alerts': []  # Time-based and iteration alerts
     }
 
 
@@ -182,6 +194,410 @@ def get_recent_progress(lines: int = 20) -> List[str]:
         return all_lines[-lines:] if len(all_lines) > lines else all_lines
     except IOError:
         return []
+
+
+# ============================================================================
+# Clarification Persistence
+# ============================================================================
+
+def add_clarification(
+    question: str,
+    answer: str,
+    phase: str,
+    category: str = 'general'
+) -> None:
+    """
+    Persist a user's clarification answer for session recovery.
+
+    Categories: scope, priority, technical, integration, data, error_handling
+    """
+    state = load_state()
+    if not state:
+        return
+
+    state.setdefault('clarifications', []).append({
+        'question': question,
+        'answer': answer,
+        'phase': phase,
+        'category': category,
+        'timestamp': now_iso()
+    })
+    save_state(state)
+    log_progress(f"CLARIFICATION [{category}]: {question[:50]}... -> {answer[:50]}...")
+
+
+def get_clarifications(phase: str = None, category: str = None) -> List[Dict[str, Any]]:
+    """Get stored clarifications, optionally filtered by phase or category."""
+    state = load_state()
+    if not state:
+        return []
+
+    clarifications = state.get('clarifications', [])
+
+    if phase:
+        clarifications = [c for c in clarifications if c.get('phase') == phase]
+    if category:
+        clarifications = [c for c in clarifications if c.get('category') == category]
+
+    return clarifications
+
+
+def get_clarification_summary() -> str:
+    """Get a summary of all clarifications for context."""
+    state = load_state()
+    if not state:
+        return "No clarifications recorded."
+
+    clarifications = state.get('clarifications', [])
+    if not clarifications:
+        return "No clarifications recorded."
+
+    lines = ["## User Clarifications", ""]
+    for c in clarifications:
+        lines.append(f"**{c.get('category', 'general').title()}:** {c['question']}")
+        lines.append(f"  → {c['answer']}")
+        lines.append("")
+
+    return '\n'.join(lines)
+
+
+# ============================================================================
+# Failure Categorization
+# ============================================================================
+
+# Failure categories with detection patterns
+FAILURE_CATEGORIES = {
+    'code': {
+        'description': 'Bug in implementation',
+        'patterns': ['error:', 'exception:', 'failed assertion', 'null reference', 'undefined'],
+        'retryable': True
+    },
+    'test': {
+        'description': 'Test itself is incorrect',
+        'patterns': ['expected:', 'actual:', 'assertion failed', 'test setup failed'],
+        'retryable': True
+    },
+    'infra': {
+        'description': 'Infrastructure issue (DB, network, filesystem)',
+        'patterns': ['connection refused', 'timeout', 'database', 'network', 'permission denied', 'disk full'],
+        'retryable': True,
+        'backoff': True
+    },
+    'external': {
+        'description': 'External service unavailable',
+        'patterns': ['api key', 'authentication', 'rate limit', '401', '403', '503', 'service unavailable'],
+        'retryable': False,
+        'escalate': True
+    },
+    'timeout': {
+        'description': 'Operation timed out',
+        'patterns': ['timed out', 'deadline exceeded', 'operation timeout'],
+        'retryable': True,
+        'backoff': True
+    }
+}
+
+
+def categorize_failure(error_message: str) -> str:
+    """
+    Categorize a failure based on error message patterns.
+    Returns the category name.
+    """
+    error_lower = error_message.lower()
+
+    for category, config in FAILURE_CATEGORIES.items():
+        for pattern in config['patterns']:
+            if pattern.lower() in error_lower:
+                return category
+
+    return 'code'  # Default to code issue
+
+
+def add_failure(
+    story_id: str,
+    error_message: str,
+    category: str = None,
+    context: Dict[str, Any] = None
+) -> Dict[str, Any]:
+    """
+    Record a categorized failure for analysis and retry decisions.
+
+    Returns the failure record with retry recommendations.
+    """
+    state = load_state()
+    if not state:
+        return {}
+
+    # Auto-categorize if not specified
+    if not category:
+        category = categorize_failure(error_message)
+
+    category_config = FAILURE_CATEGORIES.get(category, FAILURE_CATEGORIES['code'])
+
+    failure = {
+        'id': f"F{len(state.get('failures', [])) + 1}",
+        'storyId': story_id,
+        'category': category,
+        'message': error_message[:500],  # Truncate long messages
+        'context': context or {},
+        'timestamp': now_iso(),
+        'iteration': get_iteration_count(),
+        'retryable': category_config.get('retryable', True),
+        'needsBackoff': category_config.get('backoff', False),
+        'shouldEscalate': category_config.get('escalate', False)
+    }
+
+    state.setdefault('failures', []).append(failure)
+
+    # Update metrics
+    metrics = state.setdefault('metrics', {})
+    by_category = metrics.setdefault('failuresByCategory', {})
+    by_category[category] = by_category.get(category, 0) + 1
+
+    save_state(state)
+    log_progress(f"FAILURE [{category.upper()}]: {error_message[:100]}...", story_id=story_id)
+
+    return failure
+
+
+def get_story_failures(story_id: str) -> List[Dict[str, Any]]:
+    """Get all failures for a specific story."""
+    state = load_state()
+    if not state:
+        return []
+
+    return [f for f in state.get('failures', []) if f.get('storyId') == story_id]
+
+
+def get_retry_recommendation(story_id: str) -> Dict[str, Any]:
+    """
+    Analyze failures and recommend retry strategy.
+
+    Returns:
+        - should_retry: bool
+        - reason: str
+        - backoff_seconds: int (if applicable)
+        - escalate: bool
+    """
+    failures = get_story_failures(story_id)
+
+    if not failures:
+        return {'should_retry': True, 'reason': 'No failures recorded'}
+
+    recent = failures[-3:]  # Look at last 3 failures
+
+    # Check for escalation triggers
+    external_failures = [f for f in recent if f.get('category') == 'external']
+    if len(external_failures) >= 2:
+        return {
+            'should_retry': False,
+            'reason': 'External service failures - manual intervention needed',
+            'escalate': True
+        }
+
+    # Check for infrastructure issues needing backoff
+    infra_failures = [f for f in recent if f.get('needsBackoff')]
+    if infra_failures:
+        return {
+            'should_retry': True,
+            'reason': 'Infrastructure issue - retry with backoff',
+            'backoff_seconds': 30 * len(infra_failures)  # Progressive backoff
+        }
+
+    # Check for repeated same error
+    if len(recent) >= 3:
+        messages = [f.get('message', '')[:50] for f in recent]
+        if len(set(messages)) == 1:
+            return {
+                'should_retry': False,
+                'reason': 'Same error repeated 3 times - needs different approach',
+                'escalate': True
+            }
+
+    return {'should_retry': True, 'reason': 'Standard retry'}
+
+
+# ============================================================================
+# Elapsed Time Tracking & Alerts
+# ============================================================================
+
+def get_elapsed_minutes() -> float:
+    """Get elapsed minutes since workflow start."""
+    state = load_state()
+    if not state:
+        return 0
+
+    try:
+        started = datetime.fromisoformat(state['startedAt'].replace('Z', '+00:00'))
+        elapsed = (datetime.now(timezone.utc) - started).total_seconds() / 60
+        return round(elapsed, 1)
+    except:
+        return 0
+
+
+def check_time_alerts() -> List[Dict[str, Any]]:
+    """
+    Check for time-based conditions and return alerts.
+
+    Alerts:
+    - Progress report due (every 30 min)
+    - Long-running story warning (> story timeout)
+    - Extended workflow warning (> 2 hours)
+    - Checkpoint due (every 5 stories)
+    """
+    state = load_state()
+    if not state:
+        return []
+
+    alerts = []
+    elapsed = get_elapsed_minutes()
+
+    # Check for progress report due
+    last_report = state.get('checkpoints', {}).get('lastProgressReport')
+    if last_report:
+        try:
+            last = datetime.fromisoformat(last_report.replace('Z', '+00:00'))
+            mins_since_report = (datetime.now(timezone.utc) - last).total_seconds() / 60
+            if mins_since_report >= 30:
+                alerts.append({
+                    'type': 'progress_report_due',
+                    'severity': 'info',
+                    'message': f'Progress report due (last: {int(mins_since_report)}m ago)'
+                })
+        except:
+            pass
+
+    # Check for extended workflow
+    if elapsed >= 120:  # 2 hours
+        alerts.append({
+            'type': 'extended_workflow',
+            'severity': 'warning',
+            'message': f'Workflow running for {int(elapsed)}m - consider context management'
+        })
+    elif elapsed >= 240:  # 4 hours
+        alerts.append({
+            'type': 'very_long_workflow',
+            'severity': 'critical',
+            'message': f'Workflow running for {int(elapsed)}m - aggressive context trimming recommended'
+        })
+
+    # Check for story timeout
+    current = get_next_story_internal(state)
+    if current and current.get('status') == 'in_progress':
+        story_timeout = state.get('timeouts', {}).get('storyMaxMinutes', 30)
+        try:
+            started = datetime.fromisoformat(current['lastUpdated'].replace('Z', '+00:00'))
+            story_mins = (datetime.now(timezone.utc) - started).total_seconds() / 60
+            if story_mins > story_timeout:
+                alerts.append({
+                    'type': 'story_timeout',
+                    'severity': 'warning',
+                    'storyId': current['id'],
+                    'message': f"Story {current['id']} exceeded {story_timeout}m timeout ({int(story_mins)}m elapsed)"
+                })
+        except:
+            pass
+
+    # Check iteration count warnings
+    iterations = get_iteration_count()
+    if iterations >= 50:
+        alerts.append({
+            'type': 'high_iterations',
+            'severity': 'warning',
+            'message': f'High iteration count: {iterations} - verify progress is being made'
+        })
+
+    # Store alerts in state
+    state['alerts'] = alerts
+    save_state(state)
+
+    return alerts
+
+
+def get_next_story_internal(state: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Internal helper to get next story from provided state."""
+    stories = state.get('stories', [])
+    for s in stories:
+        if s['status'] in ['in_progress', 'testing', 'review']:
+            return s
+    for s in stories:
+        if s['status'] == 'pending':
+            return s
+    return None
+
+
+# ============================================================================
+# TDD Phase Tracking
+# ============================================================================
+
+TDD_PHASES = ['red', 'green', 'refactor', 'verify']
+
+
+def update_tdd_phase(story_id: str, phase: str) -> bool:
+    """
+    Track TDD phase for a story.
+    Phases: red (write failing test), green (make it pass), refactor, verify
+    """
+    if phase not in TDD_PHASES:
+        return False
+
+    state = load_state()
+    if not state:
+        return False
+
+    for story in state['stories']:
+        if story['id'] == story_id:
+            story['tddPhase'] = phase
+            story['tddPhaseStarted'] = now_iso()
+            story.setdefault('tddHistory', []).append({
+                'phase': phase,
+                'timestamp': now_iso(),
+                'iteration': get_iteration_count()
+            })
+            save_state(state)
+            log_progress(f"TDD Phase: {phase.upper()}", story_id=story_id)
+            return True
+
+    return False
+
+
+def get_tdd_phase(story_id: str) -> Optional[str]:
+    """Get current TDD phase for a story."""
+    state = load_state()
+    if not state:
+        return None
+
+    for story in state['stories']:
+        if story['id'] == story_id:
+            return story.get('tddPhase')
+
+    return None
+
+
+def validate_tdd_progression(story_id: str, next_phase: str) -> Dict[str, Any]:
+    """
+    Validate TDD phase progression.
+    Ensures red->green->refactor->verify order.
+    """
+    current = get_tdd_phase(story_id)
+
+    if current is None and next_phase == 'red':
+        return {'valid': True}
+
+    expected_order = {'red': 'green', 'green': 'refactor', 'refactor': 'verify', 'verify': 'red'}
+
+    if current and expected_order.get(current) == next_phase:
+        return {'valid': True}
+
+    # Allow skipping refactor if minor changes
+    if current == 'green' and next_phase == 'verify':
+        return {'valid': True, 'warning': 'Skipped refactor phase'}
+
+    return {
+        'valid': False,
+        'error': f"Invalid TDD progression: {current or 'none'} -> {next_phase}",
+        'expected': expected_order.get(current, 'red')
+    }
 
 
 # ============================================================================
@@ -741,6 +1157,25 @@ if __name__ == '__main__':
         print('  verify <story_id> <check> [--passed|--failed] [--details "msg"]')
         print('  verify-status <story_id>       Get verification status')
         print('')
+        print('TDD Tracking:')
+        print('  tdd-phase <story_id> <phase>   Set TDD phase (red|green|refactor|verify)')
+        print('  tdd-status <story_id>          Get current TDD phase')
+        print('  tdd-validate <story_id> <next> Validate TDD phase transition')
+        print('')
+        print('Clarifications:')
+        print('  add-clarification <question> <answer> --phase <phase> [--category <cat>]')
+        print('  get-clarifications [--phase <phase>] [--category <cat>]')
+        print('  clarification-summary          Get formatted summary of all clarifications')
+        print('')
+        print('Failure Tracking:')
+        print('  add-failure <story_id> <error> [--category code|test|infra|external|timeout]')
+        print('  get-failures <story_id>        Get all failures for a story')
+        print('  retry-recommendation <story_id> Get retry strategy recommendation')
+        print('')
+        print('Time & Alerts:')
+        print('  elapsed                        Show elapsed time in minutes')
+        print('  check-alerts                   Check for time-based alerts')
+        print('')
         print('Progress & Context:')
         print('  progress [--lines N]           Show recent progress entries')
         print('  compact-context                Get minimal context summary')
@@ -887,6 +1322,96 @@ if __name__ == '__main__':
 
     elif command == 'iteration':
         print(f'Current iteration: {get_iteration_count()}')
+
+    # TDD Tracking commands
+    elif command == 'tdd-phase':
+        story_id = sys.argv[2] if len(sys.argv) > 2 else 'S1'
+        phase = sys.argv[3] if len(sys.argv) > 3 else 'red'
+        if update_tdd_phase(story_id, phase):
+            print(f'TDD phase for {story_id}: {phase.upper()}')
+        else:
+            print(f'Failed to set TDD phase (invalid phase or story)')
+            sys.exit(1)
+
+    elif command == 'tdd-status':
+        story_id = sys.argv[2] if len(sys.argv) > 2 else 'S1'
+        phase = get_tdd_phase(story_id)
+        print(f'TDD phase for {story_id}: {phase or "not started"}')
+
+    elif command == 'tdd-validate':
+        story_id = sys.argv[2] if len(sys.argv) > 2 else 'S1'
+        next_phase = sys.argv[3] if len(sys.argv) > 3 else 'green'
+        result = validate_tdd_progression(story_id, next_phase)
+        print(json.dumps(result, indent=2))
+        if not result.get('valid'):
+            sys.exit(1)
+
+    # Clarification commands
+    elif command == 'add-clarification':
+        question = sys.argv[2] if len(sys.argv) > 2 else 'Question'
+        answer = sys.argv[3] if len(sys.argv) > 3 else 'Answer'
+        phase = 'general'
+        category = 'general'
+        for i, arg in enumerate(sys.argv):
+            if arg == '--phase' and i + 1 < len(sys.argv):
+                phase = sys.argv[i + 1]
+            elif arg == '--category' and i + 1 < len(sys.argv):
+                category = sys.argv[i + 1]
+        add_clarification(question, answer, phase, category)
+        print(f'Added clarification: {question[:30]}...')
+
+    elif command == 'get-clarifications':
+        phase = None
+        category = None
+        for i, arg in enumerate(sys.argv):
+            if arg == '--phase' and i + 1 < len(sys.argv):
+                phase = sys.argv[i + 1]
+            elif arg == '--category' and i + 1 < len(sys.argv):
+                category = sys.argv[i + 1]
+        clarifications = get_clarifications(phase, category)
+        print(json.dumps(clarifications, indent=2))
+
+    elif command == 'clarification-summary':
+        print(get_clarification_summary())
+
+    # Failure tracking commands
+    elif command == 'add-failure':
+        story_id = sys.argv[2] if len(sys.argv) > 2 else 'S1'
+        error = sys.argv[3] if len(sys.argv) > 3 else 'Unknown error'
+        category = None
+        for i, arg in enumerate(sys.argv):
+            if arg == '--category' and i + 1 < len(sys.argv):
+                category = sys.argv[i + 1]
+        failure = add_failure(story_id, error, category)
+        print(f'Added failure: {failure.get("id")} [{failure.get("category")}]')
+
+    elif command == 'get-failures':
+        story_id = sys.argv[2] if len(sys.argv) > 2 else 'S1'
+        failures = get_story_failures(story_id)
+        print(json.dumps(failures, indent=2))
+
+    elif command == 'retry-recommendation':
+        story_id = sys.argv[2] if len(sys.argv) > 2 else 'S1'
+        recommendation = get_retry_recommendation(story_id)
+        print(json.dumps(recommendation, indent=2))
+        if recommendation.get('escalate'):
+            sys.exit(2)  # Special exit code for escalation
+
+    # Time & Alert commands
+    elif command == 'elapsed':
+        print(f'Elapsed: {get_elapsed_minutes()} minutes')
+
+    elif command == 'check-alerts':
+        alerts = check_time_alerts()
+        if alerts:
+            print('ALERTS:')
+            for alert in alerts:
+                print(f"  [{alert['severity'].upper()}] {alert['type']}: {alert['message']}")
+            # Exit with warning code if critical alerts
+            if any(a['severity'] == 'critical' for a in alerts):
+                sys.exit(3)
+        else:
+            print('No alerts')
 
     else:
         print(f'Unknown command: {command}')
