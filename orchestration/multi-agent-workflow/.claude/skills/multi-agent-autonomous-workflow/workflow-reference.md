@@ -239,6 +239,66 @@ python .claude/core/state.py recover
 python .claude/core/state.py complete
 ```
 
+## Pull Request Creation (Phase 3)
+
+After all stories are completed and verified, create a pull request:
+
+```bash
+# 1. Verify clean working state
+git status
+
+# 2. Push branch to remote
+git push -u origin HEAD
+
+# 3. Create PR using GitHub CLI
+gh pr create \
+  --title "[Feature] <Goal Summary>" \
+  --body "$(cat <<'EOF'
+## Summary
+<1-2 sentence description of implementation>
+
+## Stories Implemented
+| ID | Title | Status |
+|----|-------|--------|
+| S1 | <title> | Completed |
+| S2 | <title> | Completed |
+
+## Changes Made
+- <Key change 1>
+- <Key change 2>
+
+## Testing
+- All unit tests passing
+- Coverage thresholds met
+- Integration tests verified
+
+## Verification Checklist
+- [x] Code review approved
+- [x] Security review passed (if applicable)
+- [x] All acceptance criteria met
+- [x] Build passes
+
+---
+Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
+```
+
+### PR Creation Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| `gh: command not found` | Install GitHub CLI: https://cli.github.com/ |
+| `not authenticated` | Run `gh auth login` |
+| `no remote configured` | Run `git remote add origin <url>` |
+| `branch doesn't exist` | Push first: `git push -u origin HEAD` |
+
+### PR Requirements
+- **Always** create a PR at workflow completion
+- **Never** complete workflow without creating PR (unless user explicitly skips)
+- Include all completed story IDs in description
+- Link to related issues if applicable
+
 ## Quality Gates
 
 ### G1: Pre-Implementation

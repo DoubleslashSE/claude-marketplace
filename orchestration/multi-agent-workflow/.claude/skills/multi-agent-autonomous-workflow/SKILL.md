@@ -116,8 +116,42 @@ for story in stories:
 ### Phase 3: Completion
 1. Verify all stories completed: `python .claude/core/state.py status`
 2. Invoke `devops` if deployment needed
-3. Complete workflow: `python .claude/core/state.py complete`
-4. Generate final summary
+3. **Create Pull Request** (REQUIRED):
+   ```bash
+   # Ensure all changes committed
+   git status
+
+   # Push branch to remote
+   git push -u origin HEAD
+
+   # Create PR with summary of all completed stories
+   gh pr create --title "[Feature] <Goal Summary>" --body "$(cat <<'EOF'
+   ## Summary
+   <Brief description of what was implemented>
+
+   ## Stories Implemented
+   - S1: <title>
+   - S2: <title>
+   ...
+
+   ## Testing
+   - All tests passing
+   - Coverage thresholds met
+
+   ## Verification
+   - [x] Code review approved
+   - [x] Security review passed (if applicable)
+   - [x] All acceptance criteria met
+
+   ---
+   Generated with [Claude Code](https://claude.com/claude-code)
+   EOF
+   )"
+   ```
+4. Complete workflow: `python .claude/core/state.py complete`
+5. Generate final summary with PR URL
+
+**Important:** Always create a PR at workflow completion. If `gh` CLI fails, verify installation (`gh --version`) and authentication (`gh auth status`).
 
 ## Quality Gates
 
