@@ -16,8 +16,24 @@
     "xunit",
     "nunit"
   ],
-  "commands": "./commands/",
-  "agents": "./agents/",
-  "skills": "./skills/",
+  "commands": [
+    "./commands/tdd.md",
+    "./commands/red.md",
+    "./commands/green.md",
+    "./commands/refactor.md",
+    "./commands/review.md"
+  ],
+  "agents": [
+    "./agents/test-designer.md",
+    "./agents/implementer.md",
+    "./agents/refactorer.md",
+    "./agents/reviewer.md"
+  ],
+  "skills": [
+    "./skills/tdd-workflow",
+    "./skills/solid-principles",
+    "./skills/clean-code",
+    "./skills/cqs-patterns"
+  ],
   "hooks": "./hooks/hooks.json"
 }
