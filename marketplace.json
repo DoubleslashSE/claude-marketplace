@@ -1,0 +1,16 @@
+{
+  "name": "doubleslash-plugins",
+  "description": "Claude Code plugins by DoubleslashSE",
+  "owner": {
+    "name": "DoubleslashSE",
+    "url": "https://github.com/DoubleslashSE"
+  },
+  "plugins": [
+    {
+      "name": "dotnet-tdd",
+      "source": "./Plugins/dotnet-tdd",
+      "description": "Test-Driven Development plugin for .NET following TDD, SOLID, DRY, KISS, YAGNI, and CQS principles",
+      "version": "1.0.0"
+    }
+  ]
+}
