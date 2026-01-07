@@ -6,9 +6,28 @@ description: Execute complete business analysis workflow. Auto-detects greenfiel
 
 Execute comprehensive business analysis for: **$ARGUMENTS**
 
+## Objective Context
+
+**IMPORTANT**: Parse the arguments for an objective/context statement that explains WHY this analysis is being done. Look for patterns like:
+- `--objective "..."` or `-o "..."`
+- `--context "..."` or `-c "..."`
+- `--reason "..."` or `-r "..."`
+- Natural language after path/name: `./src - refactoring for testability`
+- Quoted context: `MyProject "adding real-time features"`
+
+If an objective is provided, store it as the **Analysis Objective** and use it to:
+1. **Focus the entire workflow** - Every phase should align with this objective
+2. **Prioritize relevant areas** - Spend more time on aspects that matter for the goal
+3. **Shape stakeholder questions** - Ask questions oriented toward the objective
+4. **Guide recommendations** - All outputs should help achieve the stated goal
+
+**Analysis Objective**: {extracted from arguments, or ask during context assessment}
+
 ## Workflow Overview
 
 This command orchestrates the complete business analysis process, automatically detecting whether this is a greenfield (new) or brownfield (existing) project and adapting the workflow accordingly.
+
+**When an objective is provided**, acknowledge it immediately and let it drive the analysis focus throughout all phases.
 
 ## Auto-Detection Logic
 
@@ -215,9 +234,35 @@ If you need more focused analysis, use these commands:
 
 ## Getting Started
 
-Let's begin the analysis. First, I need to understand the context:
+**If an objective was provided in the arguments**, acknowledge it:
+> "I see you want to analyze this for: **{objective}**. I'll focus my analysis accordingly."
+
+Then gather remaining context as needed.
+
+**If no objective was provided**, begin with:
 
 1. What is the name/description of the project?
 2. Is this a new project or does it involve an existing system?
-3. Who are the key stakeholders?
-4. What are the primary business objectives?
+3. **What is driving this analysis?** (the "why")
+   - Refactoring for maintainability/testability?
+   - Adding a major new feature?
+   - Migration or modernization?
+   - Security/compliance audit?
+   - Performance optimization?
+   - General understanding before changes?
+4. Who are the key stakeholders?
+5. What are the primary business objectives?
+
+## Usage Examples
+
+```bash
+# Basic usage (will ask for objective)
+/business-analyst:analyze MyProject
+
+# With explicit objective
+/business-analyst:analyze ./src --objective "Refactor payment module for PCI compliance"
+/business-analyst:analyze CustomerPortal -o "Add real-time notifications feature"
+
+# Natural language
+/business-analyst:analyze ./legacy-api - modernize to REST standards
+```

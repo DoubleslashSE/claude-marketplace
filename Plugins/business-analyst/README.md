@@ -4,11 +4,26 @@ A comprehensive Senior Business Analyst plugin that helps gather requirements, a
 
 ## Features
 
+- **Objective-Driven Analysis**: Provide upfront context about WHY you're analyzing, and the entire workflow focuses accordingly
 - **Requirements Gathering**: Structured and adaptive interview techniques
 - **Codebase Analysis**: Reverse-engineer requirements from existing code
 - **SRS Generation**: IEEE 830 compliant Software Requirements Specification
 - **Validation Feedback Loop**: Built-in verification and quality checks
 - **Dual Context Support**: Greenfield and brownfield workflows
+
+## Objective-Driven Workflow
+
+Providing an objective upfront (e.g., "refactoring for testability" or "security audit") enables the plugin to:
+
+| Objective Type | Focus Areas |
+|----------------|-------------|
+| Performance refactor | Bottlenecks, hot paths, resource usage, caching |
+| Testability improvement | Coupling, dependencies, side effects, DI patterns |
+| Migration/modernization | Outdated patterns, framework dependencies, upgrade paths |
+| Security audit | Vulnerabilities, auth flows, data handling, input validation |
+| Feature addition | Extension points, existing patterns, integration surfaces |
+
+This context flows through all phases: discovery, interviews, analysis, and documentation.
 
 ## Installation
 
@@ -198,10 +213,27 @@ The plugin covers these requirement categories:
 
 ## Usage Examples
 
+### Providing an Objective (Recommended)
+
+All analysis commands accept an **objective** that explains WHY you're doing the analysis. This helps focus the entire workflow on what matters most.
+
+```bash
+# With --objective flag
+/business-analyst:brownfield ./src --objective "Refactor for better testability"
+/business-analyst:analyze ./api -o "Migrate to microservices architecture"
+
+# Natural language (path followed by context)
+/business-analyst:brownfield ./src/payments - PCI compliance audit
+/business-analyst:analyze ./legacy "modernize to REST standards"
+```
+
 ### Start Full Analysis
 ```bash
 # Auto-detect project type and run complete analysis
 /business-analyst:analyze My E-commerce Platform
+
+# With objective for focused analysis
+/business-analyst:analyze ./src --objective "Add real-time notification system"
 ```
 
 ### Greenfield Project
@@ -212,8 +244,12 @@ The plugin covers these requirement categories:
 
 ### Brownfield Analysis
 ```bash
-# Analyze existing codebase
+# Basic analysis (will ask for objective)
 /business-analyst:brownfield ./src
+
+# Focused analysis with objective
+/business-analyst:brownfield ./src/auth --objective "Replace with OAuth2"
+/business-analyst:brownfield ./api - need to improve error handling
 ```
 
 ### Interactive Interview

@@ -6,9 +6,27 @@ description: Execute business analysis for a new project. Focuses on stakeholder
 
 Execute new project analysis for: **$ARGUMENTS**
 
+## Objective Context
+
+**IMPORTANT**: Parse the arguments for an objective/context statement that explains the driving purpose. Look for patterns like:
+- `--objective "..."` or `-o "..."`
+- `--context "..."` or `-c "..."`
+- Natural language after project name: `MyApp - need mobile-first e-commerce`
+- Quoted context: `CustomerPortal "replace legacy desktop app"`
+
+If an objective is provided, store it as the **Analysis Objective** and use it to:
+1. **Shape vision discussions** - Orient around the stated goal
+2. **Focus requirements** - Prioritize requirements that serve the objective
+3. **Guide stakeholder questions** - Ask questions relevant to the purpose
+4. **Align outputs** - Ensure all documentation supports the objective
+
+**Analysis Objective**: {extracted from arguments, or gathered during Phase 1}
+
 ## Greenfield Overview
 
 This command is optimized for new projects where there is no existing codebase. The focus is on gathering requirements from stakeholders, defining scope, and documenting the vision for the new system.
+
+**When an objective is provided**, it becomes the north star for the entire analysis.
 
 ## Greenfield Workflow
 
@@ -181,7 +199,31 @@ I will pause for your confirmation at:
 
 Let's begin the greenfield analysis!
 
-First, tell me about your project:
+**If an objective was provided in the arguments**, acknowledge it:
+> "I see you're building this for: **{objective}**. I'll focus my analysis accordingly."
+
+Then gather remaining context.
+
+**If no objective was provided**, ask:
 1. What is the name of the project?
 2. In 2-3 sentences, what problem does it solve?
-3. Who is the primary target user?
+3. **What is the primary driver?** Examples:
+   - "Replacing a legacy system"
+   - "New market opportunity"
+   - "Customer request"
+   - "Internal efficiency improvement"
+4. Who is the primary target user?
+
+## Usage Examples
+
+```bash
+# Basic usage (will gather objective during Phase 1)
+/business-analyst:greenfield MyNewApp
+
+# With objective
+/business-analyst:greenfield CustomerPortal --objective "Replace legacy desktop app with web-based solution"
+/business-analyst:greenfield MobileApp -o "Capture millennial market segment"
+
+# Natural language
+/business-analyst:greenfield TimeTracker - internal tool to replace spreadsheets
+```

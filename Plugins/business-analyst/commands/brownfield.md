@@ -6,24 +6,56 @@ description: Execute business analysis for an existing codebase. Reverse-enginee
 
 Execute existing codebase analysis for: **$ARGUMENTS**
 
+## Objective Context
+
+**IMPORTANT**: Parse the arguments for an objective/context statement. Look for patterns like:
+- `--objective "..."` or `-o "..."`
+- `--context "..."` or `-c "..."`
+- `--reason "..."` or `-r "..."`
+- Natural language after the path: `./src - refactoring for testability`
+- Quoted context: `./src "migrating to microservices"`
+
+If an objective is provided, store it as the **Analysis Objective** and use it to:
+1. **Focus discovery** - Prioritize areas relevant to the objective
+2. **Weight findings** - Emphasize aspects that matter for the stated goal
+3. **Guide questions** - Ask stakeholder questions oriented toward the objective
+4. **Shape recommendations** - Align all outputs with the intended outcome
+
+**Analysis Objective**: {extracted from arguments, or "General analysis" if not specified}
+
 ## Brownfield Overview
 
 This command is optimized for projects involving existing systems. The workflow combines codebase analysis to understand current capabilities with stakeholder interviews to identify desired changes and improvements.
+
+**When an objective is provided**, the entire workflow adapts:
+- Performance refactor → Focus on bottlenecks, hot paths, resource usage
+- Testability improvement → Focus on coupling, dependencies, side effects
+- Migration/modernization → Focus on outdated patterns, upgrade paths
+- Security audit → Focus on vulnerabilities, data flows, auth boundaries
+- Feature addition → Focus on extension points, existing patterns to follow
 
 ## Brownfield Workflow
 
 ### Phase 1: Codebase Discovery (20 min)
 
+**Objective-Driven Discovery**
+If an objective was provided, immediately focus discovery on relevant areas:
+- For "performance" objectives → Start with hot paths, database queries, I/O operations
+- For "testability" objectives → Start with tightly coupled components, static dependencies
+- For "security" objectives → Start with auth, input validation, data handling
+- For "migration" objectives → Start with framework dependencies, deprecated APIs
+
 **Project Structure Analysis**
 1. Identify technology stack
 2. Map project organization
 3. Identify architectural patterns
-4. Locate key components
+4. Locate key components **relevant to the objective**
 
-**Initial Questions**
+**Initial Questions** (skip if already answered via objective)
 - What path should I analyze?
 - Are there multiple services/components?
 - Is there existing documentation to review?
+- **What is driving this analysis?** (if objective not provided)
 
 ### Phase 2: Domain Model Extraction (30 min)
 
@@ -210,8 +242,36 @@ Focus on particular concerns:
 
 Let's begin the brownfield analysis!
 
-First, I need to know:
+**If an objective was provided in the arguments**, acknowledge it:
+> "I see you want to analyze this codebase for: **{objective}**. I'll focus my analysis accordingly."
+
+Then proceed directly to Phase 1, using the objective to guide discovery.
+
+**If no objective was provided**, ask:
 1. What is the path to the codebase to analyze?
 2. What technology stack is used (if you know)?
-3. What is the main reason for this analysis (enhancement, migration, audit)?
+3. **What is driving this analysis?** Examples:
+   - "Refactoring for better testability"
+   - "Migrating from monolith to microservices"
+   - "Security audit before going to production"
+   - "Adding a new feature and need to understand the codebase"
+   - "Performance optimization"
 4. Are there specific areas of concern?
+
+## Usage Examples
+
+```bash
+# Basic usage (will ask for objective interactively)
+/business-analyst:brownfield ./src
+
+# With objective flag
+/business-analyst:brownfield ./src --objective "Refactor to improve testability"
+/business-analyst:brownfield ./src -o "Migrate authentication to OAuth2"
+
+# Natural language (path followed by context)
+/business-analyst:brownfield ./src/orders - need to split into microservice
+/business-analyst:brownfield ./api "security audit for compliance"
+
+# Focused analysis with objective
+/business-analyst:brownfield ./src/payments --objective "PCI compliance audit"
+```

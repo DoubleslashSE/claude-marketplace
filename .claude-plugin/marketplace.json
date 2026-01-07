@@ -16,7 +16,7 @@
       "name": "business-analyst",
       "source": "./Plugins/business-analyst",
       "description": "Senior Business Analyst plugin for requirements gathering, codebase analysis, stakeholder interviews, and IEEE 830 SRS generation with integrated feedback loop",
-      "version": "1.0.0"
+      "version": "1.0.1"
     }
   ]
 }

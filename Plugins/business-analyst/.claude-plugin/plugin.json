@@ -1,6 +1,6 @@
 {
   "name": "business-analyst",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Senior Business Analyst plugin for requirements gathering, codebase analysis, stakeholder interviews, and SRS document generation. Supports greenfield and brownfield development with built-in validation feedback loops.",
   "author": {
     "name": "Claude Code Plugin",
