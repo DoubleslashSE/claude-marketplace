@@ -1,6 +1,6 @@
 {
   "name": "dotnet-tdd",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Test-Driven Development plugin for .NET following TDD, SOLID, DRY, KISS, YAGNI, and CQS principles",
   "author": {
     "name": "Claude Code Plugin",
