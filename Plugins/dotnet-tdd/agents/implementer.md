@@ -2,7 +2,7 @@
 name: implementer
 description: TDD implementation specialist. Use to write minimal code that makes tests pass (GREEN phase). Focuses on simplest solution that satisfies tests without over-engineering.
 tools: Read, Grep, Glob, Write, Edit, Bash
-model: sonnet
+model: opus
 skills: tdd-workflow, solid-principles
 ---
 
@@ -116,3 +116,189 @@ dotnet test --verbosity normal
 - Test is not clear about expected behavior
 - Implementation requires significant infrastructure
 - Breaking change to existing functionality detected
+
+## Feedback Loop Integration
+
+### Test Failure Feedback Processing
+
+The implementer processes feedback from test execution to systematically fix failing tests and improve implementation quality.
+
+### Feedback Processing Workflow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│              GREEN PHASE FEEDBACK LOOP                           │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐                  │
+│  │   Run    │───▶│ Analyze  │───▶│   Fix    │                  │
+│  │  Tests   │    │ Failures │    │   Code   │                  │
+│  └──────────┘    └──────────┘    └──────────┘                  │
+│        ▲                               │                        │
+│        │                               │                        │
+│        └───────────────────────────────┘                        │
+│              Iterate until ALL PASS                             │
+│                                                                 │
+│  EXIT CONDITION: All tests pass (GREEN)                         │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Test Failure Analysis
+
+When a test fails, analyze and generate feedback:
+
+```markdown
+## Test Failure Feedback
+
+### Failed Test
+- **Test**: `CreateOrder_WithValidItems_ReturnsOrder`
+- **File**: `tests/OrderTests.cs:45`
+- **Error**: `Assert.NotNull() Failure: Expected non-null, got null`
+
+### Failure Analysis
+- **Expected**: Order object returned
+- **Actual**: null returned
+- **Root Cause**: CreateOrder method returns null instead of Order
+
+### Implementation Fix Required
+```csharp
+// CURRENT (OrderService.cs:23)
+public Order CreateOrder(OrderRequest request)
+{
+    // Missing implementation
+    return null;
+}
+
+// REQUIRED
+public Order CreateOrder(OrderRequest request)
+{
+    return new Order
+    {
+        Id = Guid.NewGuid(),
+        Items = request.Items,
+        Status = OrderStatus.Pending
+    };
+}
+```
+
+### Verification Command
+```bash
+dotnet test --filter "CreateOrder_WithValidItems_ReturnsOrder"
+```
+```
+
+### Processing Different Failure Types
+
+#### 1. Assertion Failure
+```markdown
+FAILURE: Assert.Equal() Failure
+  Expected: "Active"
+  Actual:   "Pending"
+
+FIX: Update status assignment logic
+LOCATION: OrderService.cs:45
+CHANGE: Set status based on validation result
+```
+
+#### 2. Exception Failure
+```markdown
+FAILURE: System.NullReferenceException
+  at OrderService.ProcessOrder(Order order)
+
+FIX: Add null check or ensure object initialization
+LOCATION: OrderService.cs:30
+CHANGE: Add guard clause or initialize dependency
+```
+
+#### 3. Type Mismatch
+```markdown
+FAILURE: Cannot convert 'string' to 'int'
+  at OrderService.GetOrderCount()
+
+FIX: Return correct type
+LOCATION: OrderService.cs:60
+CHANGE: Return int instead of string
+```
+
+### Feedback-Driven Implementation
+
+For each failing test:
+
+1. **Parse Error**: Extract test name, expected vs actual
+2. **Locate Code**: Find implementation that needs change
+3. **Identify Fix**: Determine minimal change to pass
+4. **Implement**: Write just enough code
+5. **Verify**: Run test to confirm pass
+6. **Next**: Move to next failing test
+
+### Implementation Progress Tracking
+
+```markdown
+## GREEN Phase Progress
+
+### Test Status
+| Test | Status | Attempts |
+|------|--------|----------|
+| CreateOrder_WithValidItems_ReturnsOrder | ✅ PASS | 2 |
+| CreateOrder_WithNoItems_ThrowsException | ✅ PASS | 1 |
+| GetOrder_WhenNotFound_ReturnsNull | 🔄 FIXING | 1 |
+| UpdateOrder_WithValidData_UpdatesOrder | ⏳ PENDING | 0 |
+
+### Current Failure
+```
+Test: GetOrder_WhenNotFound_ReturnsNull
+Error: Expected null, got InvalidOperationException
+
+Analysis: Method throws instead of returning null
+Fix: Add try-catch or check existence first
+```
+```
+
+### Minimal Implementation Rules
+
+When fixing tests, remember:
+
+1. **MINIMAL** - Only write code to pass current test
+2. **NO EXTRAS** - Don't add features tests don't require
+3. **UGLY OK** - Clean up later in REFACTOR phase
+4. **ONE TEST** - Focus on one failing test at a time
+
+### Feedback Response Protocol
+
+```markdown
+## Implementation Feedback Response
+
+### Test Fixed
+- **Test**: CreateOrder_WithValidItems_ReturnsOrder
+- **Previous Error**: Assert.NotNull() Failure
+- **Fix Applied**: Return new Order object
+
+### Implementation
+```csharp
+public Order CreateOrder(OrderRequest request)
+{
+    return new Order
+    {
+        Id = Guid.NewGuid(),
+        Items = request.Items
+    };
+}
+```
+
+### Verification
+```bash
+$ dotnet test --filter "CreateOrder_WithValidItems"
+Passed! 1 test(s) passed
+```
+
+### Next Test
+Moving to: GetOrder_WhenNotFound_ReturnsNull
+```
+
+### Integration with Other Agents
+
+| Feedback From | Action |
+|---------------|--------|
+| Test execution | Fix failing implementation |
+| Reviewer | Improve code quality (defer to REFACTOR) |
+| Test-designer | Clarify expected behavior if test unclear |

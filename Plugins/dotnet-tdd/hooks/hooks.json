@@ -9,6 +9,15 @@
             "prompt": "A source file was modified. If this was a .cs file in the src/ or tests/ directory, consider running relevant tests with 'dotnet test' to verify the change doesn't break existing functionality. For TDD workflow, ensure tests are run after each RED, GREEN, and REFACTOR phase."
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "If 'dotnet test' was just run, analyze the results:\n\n**RED Phase**: If tests FAILED, verify they fail for the RIGHT reason. If not, adjust the test setup/assertions and re-run.\n\n**GREEN Phase**: If tests PASSED, great! Move to next failing test or REFACTOR phase. If tests FAILED, analyze the error, fix the implementation (minimal code only), and re-run until all pass.\n\n**REFACTOR Phase**: If tests PASSED after refactoring, consider running /dotnet-tdd:review to check quality scores. If tests FAILED, revert the refactoring and try a different approach."
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
@@ -16,7 +25,27 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Remember to follow TDD principles (RED-GREEN-REFACTOR) and ensure code adheres to SOLID, DRY, KISS, YAGNI, and CQS principles. Available commands: /dotnet-tdd:tdd, /dotnet-tdd:red, /dotnet-tdd:green, /dotnet-tdd:refactor, /dotnet-tdd:review"
+            "prompt": "Remember to follow TDD principles (RED-GREEN-REFACTOR) with integrated feedback loops:\n\n1. **RED Phase**: Write failing test -> Run -> Verify it fails for the RIGHT reason -> If not, adjust and re-run\n\n2. **GREEN Phase**: Write minimal code -> Run tests -> If fail, analyze and fix -> Iterate until all pass\n\n3. **REFACTOR Phase**: Improve code -> Run tests -> Run /dotnet-tdd:review -> Process feedback -> Iterate until quality score >= 90%\n\nQuality Gate: SOLID 90%, Clean Code 90%, Test Quality 90%, CQS 95%\n\nAvailable commands: /dotnet-tdd:tdd, /dotnet-tdd:red, /dotnet-tdd:green, /dotnet-tdd:refactor, /dotnet-tdd:review"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "review_complete",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Code review completed. Process the feedback:\n\n1. Check quality scores against targets (90% for SOLID/Clean/Tests, 95% for CQS)\n2. If any score < 90%, identify specific issues from the feedback\n3. Apply suggested refactorings one at a time\n4. Run tests after each change to verify GREEN state\n5. Request re-review after all fixes applied\n6. Iterate until all scores >= 90%\n\nQuality Gate: PASS >= 90%, CONDITIONAL 75-89%, FAIL < 75%"
+          }
+        ]
+      },
+      {
+        "matcher": "test_failure",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Test failure detected. Analyze the feedback:\n\n**Assertion Failure**: Check expected vs actual values, verify test logic\n**Exception Failure**: Check for null references, missing dependencies\n**Compilation Error**: Fix syntax or type issues\n\nApply minimal fix -> Re-run test -> Iterate until pass"
           }
         ]
       }
