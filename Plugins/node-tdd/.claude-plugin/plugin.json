@@ -1,6 +1,6 @@
 {
   "name": "node-tdd",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Node.js Test-Driven Development plugin with TypeScript support, SOLID principles, clean code practices, and functional patterns",
   "author": "Claude Code Plugin",
   "keywords": [
@@ -15,22 +15,74 @@
     "vitest"
   ],
   "commands": [
-    "../commands/tdd.md",
-    "../commands/red.md",
-    "../commands/green.md",
-    "../commands/refactor.md",
-    "../commands/review.md"
+    {
+      "name": "tdd",
+      "description": "Execute complete RED-GREEN-REFACTOR TDD cycle for Node.js/TypeScript development",
+      "prompt": "./commands/tdd.md"
+    },
+    {
+      "name": "red",
+      "description": "Design comprehensive failing tests for a feature or behavior in the RED phase of TDD",
+      "prompt": "./commands/red.md"
+    },
+    {
+      "name": "green",
+      "description": "Write minimal code to make failing tests pass in the GREEN phase of TDD",
+      "prompt": "./commands/green.md"
+    },
+    {
+      "name": "refactor",
+      "description": "Improve code design while maintaining all passing tests in the REFACTOR phase of TDD",
+      "prompt": "./commands/refactor.md"
+    },
+    {
+      "name": "review",
+      "description": "Review code for principle compliance and generate structured feedback",
+      "prompt": "./commands/review.md"
+    }
   ],
   "agents": [
-    "../agents/test-designer.md",
-    "../agents/implementer.md",
-    "../agents/refactorer.md",
-    "../agents/reviewer.md"
+    {
+      "name": "test-designer",
+      "description": "Designs failing tests for the RED phase of TDD in Node.js/TypeScript projects",
+      "prompt": "./agents/test-designer.md"
+    },
+    {
+      "name": "implementer",
+      "description": "Writes minimal code to pass tests during the GREEN phase of TDD",
+      "prompt": "./agents/implementer.md"
+    },
+    {
+      "name": "refactorer",
+      "description": "Improves code design during the REFACTOR phase while keeping all tests green",
+      "prompt": "./agents/refactorer.md"
+    },
+    {
+      "name": "reviewer",
+      "description": "Reviews code for principle compliance and provides structured feedback",
+      "prompt": "./agents/reviewer.md"
+    }
   ],
   "skills": [
-    "../skills/tdd-workflow/SKILL.md",
-    "../skills/solid-principles/SKILL.md",
-    "../skills/clean-code/SKILL.md",
-    "../skills/functional-patterns/SKILL.md"
+    {
+      "name": "tdd-workflow",
+      "description": "Test-Driven Development methodology for Node.js/TypeScript projects",
+      "prompt": "./skills/tdd-workflow"
+    },
+    {
+      "name": "solid-principles",
+      "description": "SOLID principles adapted for functional and TypeScript-first development",
+      "prompt": "./skills/solid-principles"
+    },
+    {
+      "name": "clean-code",
+      "description": "Clean code principles adapted for TypeScript-first, functional development",
+      "prompt": "./skills/clean-code"
+    },
+    {
+      "name": "functional-patterns",
+      "description": "Functional programming patterns that promote testability, composability, and maintainability",
+      "prompt": "./skills/functional-patterns"
+    }
   ]
 }
