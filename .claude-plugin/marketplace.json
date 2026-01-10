@@ -22,7 +22,7 @@
       "name": "node-tdd",
       "source": "./Plugins/node-tdd",
       "description": "Test-Driven Development plugin for Node.js/TypeScript with SOLID principles, clean code practices, and functional patterns",
-      "version": "1.0.0"
+      "version": "1.0.1"
     }
   ]
 }
