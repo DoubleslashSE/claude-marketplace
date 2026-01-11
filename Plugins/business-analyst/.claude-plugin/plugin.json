@@ -1,40 +1,9 @@
 {
   "name": "business-analyst",
-  "version": "1.0.1",
-  "description": "Senior Business Analyst plugin for requirements gathering, codebase analysis, stakeholder interviews, and SRS document generation. Supports greenfield and brownfield development with built-in validation feedback loops.",
+  "description": "Senior Business Analyst plugin for requirements gathering, codebase analysis, stakeholder interviews, and SRS document generation",
+  "version": "1.1.0",
   "author": {
-    "name": "Claude Code Plugin",
-    "email": "plugins@claude.ai"
-  },
-  "keywords": [
-    "business-analysis",
-    "requirements",
-    "srs",
-    "stakeholder",
-    "greenfield",
-    "brownfield",
-    "documentation",
-    "validation"
-  ],
-  "commands": [
-    "./commands/analyze.md",
-    "./commands/interview.md",
-    "./commands/greenfield.md",
-    "./commands/brownfield.md",
-    "./commands/generate-srs.md",
-    "./commands/validate.md"
-  ],
-  "agents": [
-    "./agents/requirements-analyst.md",
-    "./agents/codebase-analyzer.md",
-    "./agents/stakeholder-interviewer.md",
-    "./agents/srs-generator.md",
-    "./agents/validator.md"
-  ],
-  "skills": [
-    "./skills/requirements-elicitation",
-    "./skills/codebase-analysis",
-    "./skills/srs-documentation",
-    "./skills/technical-analysis"
-  ]
+    "name": "DoubleslashSE",
+    "email": "info@doubleslash.se"
+  }
 }

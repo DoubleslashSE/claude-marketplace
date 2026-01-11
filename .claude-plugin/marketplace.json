@@ -10,19 +10,19 @@
       "name": "dotnet-tdd",
       "source": "./Plugins/dotnet-tdd",
       "description": "Test-Driven Development plugin for .NET following TDD, SOLID, DRY, KISS, YAGNI, and CQS principles",
-      "version": "1.1.0"
+      "version": "1.2.0"
     },
     {
       "name": "business-analyst",
       "source": "./Plugins/business-analyst",
-      "description": "Senior Business Analyst plugin for requirements gathering, codebase analysis, stakeholder interviews, and IEEE 830 SRS generation with integrated feedback loop",
-      "version": "1.0.1"
+      "description": "Senior Business Analyst plugin for requirements gathering, codebase analysis, stakeholder interviews, and SRS document generation",
+      "version": "1.1.0"
     },
     {
       "name": "node-tdd",
       "source": "./Plugins/node-tdd",
       "description": "Test-Driven Development plugin for Node.js/TypeScript with SOLID principles, clean code practices, and functional patterns",
-      "version": "1.0.2"
+      "version": "1.1.0"
     }
   ]
 }

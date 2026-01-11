@@ -2,30 +2,11 @@
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Code modified. If this was a .ts/.tsx/.js/.jsx file, consider: (1) Run tests: npm test (2) Check types: npx tsc --noEmit (3) Use /node-tdd:review for quality check"
-          }
-        ]
-      },
-      {
         "matcher": "Bash",
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "If 'npm test', 'vitest', or 'jest' was just run, analyze the results:\n\n**RED Phase**: If tests FAILED, verify they fail for the RIGHT reason. If not, adjust the test setup/assertions and re-run.\n\n**GREEN Phase**: If tests PASSED, great! Move to next failing test or REFACTOR phase. If tests FAILED, analyze the error, fix the implementation (minimal code only), and re-run until all pass.\n\n**REFACTOR Phase**: If tests PASSED after refactoring, consider running /node-tdd:review to check quality scores. If tests FAILED, revert the refactoring and try a different approach."
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Node.js TDD Plugin active. Remember TDD principles (RED-GREEN-REFACTOR) with integrated feedback loops:\n\n1. **RED Phase**: Write failing test -> Run -> Verify it fails for the RIGHT reason -> If not, adjust and re-run\n\n2. **GREEN Phase**: Write minimal code -> Run tests -> If fail, analyze and fix -> Iterate until all pass\n\n3. **REFACTOR Phase**: Improve code -> Run tests -> Run /node-tdd:review -> Process feedback -> Iterate until quality score >= 90%\n\nQuality Gate: SOLID 90%, Clean Code 90%, Test Quality 90%, TypeScript/Functional 95%\n\nAvailable commands: /node-tdd:tdd, /node-tdd:red, /node-tdd:green, /node-tdd:refactor, /node-tdd:review"
+            "prompt": "If 'npm test', 'vitest', or 'jest' was just run, analyze the results for TDD phase guidance."
           }
         ]
       }
@@ -36,7 +17,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Code review completed. Process the feedback:\n\n1. Check quality scores against targets (90% for SOLID/Clean/Tests, 95% for TypeScript/Functional)\n2. If any score < 90%, identify specific issues from the feedback\n3. Apply suggested refactorings one at a time\n4. Run tests after each change to verify GREEN state\n5. Request re-review after all fixes applied\n6. Iterate until all scores >= 90%\n\nQuality Gate: PASS >= 90%, CONDITIONAL 75-89%, FAIL < 75%"
+            "prompt": "Code review completed. Check quality scores against targets (90% for SOLID/Clean/Tests, 95% for TypeScript/Functional)."
           }
         ]
       },
@@ -45,7 +26,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Test failure detected. Analyze the feedback:\n\n**Assertion Failure**: Check expected vs actual values, verify test logic\n**Exception Failure**: Check for null references, missing dependencies, type errors\n**Compilation Error**: Fix syntax or TypeScript type issues\n\nApply minimal fix -> Re-run test -> Iterate until pass"
+            "prompt": "Test failure detected. Analyze and apply minimal fix."
           }
         ]
       }

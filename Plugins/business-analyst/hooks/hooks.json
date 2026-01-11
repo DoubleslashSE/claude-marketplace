@@ -2,39 +2,11 @@
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "Read|Grep|Glob",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "When analyzing code, look for: business rules (validation, calculations, constraints), domain entities (classes, interfaces, data models), integration points (API calls, message queues, external services), and implicit requirements (error handling, edge cases). Consider what questions this raises for stakeholders that need confirmation."
-          }
-        ]
-      },
-      {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "A document was created or modified. FEEDBACK LOOP CHECK: 1) Run validation to check quality and completeness, 2) Generate structured feedback for any issues found, 3) Process feedback to identify corrections needed, 4) Ask stakeholder targeted questions from feedback, 5) Apply corrections and re-validate until PASS. Remember: The goal is continuous improvement through the validate→feedback→improve cycle."
-          }
-        ]
-      },
-      {
         "matcher": "AskUserQuestion",
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Good practice gathering stakeholder input. FEEDBACK INTEGRATION: 1) Document their response, 2) Use response to improve requirements (apply feedback), 3) Identify any follow-up questions this raises, 4) Track confirmed vs unconfirmed items, 5) Update quality metrics. If this question came from validator feedback, mark the related issue as addressed."
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "As a senior Business Analyst with integrated feedback loop: 1) After any significant work, run validation to get feedback, 2) Process validator feedback to identify improvements, 3) Apply corrections before asking for user approval, 4) Track improvement metrics across cycles, 5) Iterate until quality score >= 90% or user approves. The feedback loop ensures output quality continuously improves. Available commands: /business-analyst:analyze, /business-analyst:interview, /business-analyst:greenfield, /business-analyst:brownfield, /business-analyst:generate-srs, /business-analyst:validate"
+            "prompt": "Document stakeholder response and track confirmed vs unconfirmed items."
           }
         ]
       }
