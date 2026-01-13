@@ -1,7 +1,7 @@
 {
   "name": "dotnet-tdd",
   "description": "Test-Driven Development plugin for .NET following TDD, SOLID, DRY, KISS, YAGNI, and CQS principles",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "author": {
     "name": "DoubleslashSE",
     "email": "info@doubleslash.se"
