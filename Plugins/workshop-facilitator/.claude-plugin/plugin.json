@@ -1,7 +1,7 @@
 {
   "name": "workshop-facilitator",
   "description": "Workshop facilitation plugin for design thinking, brainstorming, and collaborative problem-solving sessions with guided phases and session artifact documentation",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "DoubleslashSE",
     "email": "info@doubleslash.se"
