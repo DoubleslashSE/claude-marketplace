@@ -23,6 +23,12 @@
       "source": "./Plugins/node-tdd",
       "description": "Test-Driven Development plugin for Node.js/TypeScript with SOLID principles, clean code practices, and functional patterns",
       "version": "1.1.1"
+    },
+    {
+      "name": "dotnet-developer",
+      "source": "./Plugins/dotnet-developer",
+      "description": "General .NET development workflow with automated validation through build, test, and static analysis quality gates",
+      "version": "1.0.0"
     }
   ]
 }

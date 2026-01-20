@@ -1,0 +1,9 @@
+{
+  "name": "dotnet-developer",
+  "description": "General .NET development workflow with automated validation through build, test, and static analysis quality gates",
+  "version": "1.0.0",
+  "author": {
+    "name": "DoubleslashSE",
+    "email": "info@doubleslash.se"
+  }
+}
