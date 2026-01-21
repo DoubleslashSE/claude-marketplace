@@ -1,0 +1,9 @@
+{
+  "name": "infra",
+  "description": "Infrastructure troubleshooting plugin for diagnosing and resolving issues across GitHub Actions, Railway, Supabase, and Postgres. Focuses on log analysis, error pattern recognition, and proactive health monitoring.",
+  "version": "1.0.0",
+  "author": {
+    "name": "DoubleslashSE",
+    "email": "info@doubleslash.se"
+  }
+}
