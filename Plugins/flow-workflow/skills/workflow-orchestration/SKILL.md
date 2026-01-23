@@ -280,13 +280,13 @@ When needing to return to earlier phase:
 3. Manual intervention
 4. Abort with state preserved
 
-**State preserved at**: .flow/STATE.md
-**Resume command**: /flow-workflow:resume
+**State preserved at**: .flow/FLOW.md and .flow/items/ITEM-XXX.md
+**Resume command**: /flow:go
 ```
 
 ## Quick Mode Orchestration
 
-For `/flow-workflow:quick`:
+For `/flow:quick`:
 
 ```markdown
 ## Quick Mode Flow
@@ -295,33 +295,34 @@ For `/flow-workflow:quick`:
 ASSESS -> CLARIFY -> IMPLEMENT -> VERIFY
 
 **Shortcuts taken**:
-- No full EXPLORATION.md
-- No detailed REQUIREMENTS.md
-- Minimal PLAN.md
-- Abbreviated verification
+- No FLOW.md or ITEM-XXX.md files created
+- No detailed requirements gathering
+- Direct execution
+- Brief verification
 
 **Escalation trigger**:
-If complexity exceeds quick mode, escalate to full workflow
+If complexity exceeds quick mode, escalate to full workflow with /flow:start
 ```
 
 ## Integration Points
 
 ### With State Management
-- Update STATE.md on every transition
-- Create checkpoints at key points
-- Maintain phase history
+- Update FLOW.md and ITEM-XXX.md on every transition
+- Create checkpoints in ITEM-XXX.md at key points
+- Maintain phase history in ITEM-XXX.md
 
 ### With Capability Discovery
-- Route to appropriate agents
-- Fallback on no match
-- Log capability gaps
+- Route to appropriate agents based on FLOW.md cache
+- Announce delegation decisions with reasoning
+- Fallback to defaults when no match
+- Log capability gaps in FLOW.md
 
 ### With Conflict Detection
 - Block transitions on active conflicts
 - Require resolution before proceeding
-- Document resolved conflicts
+- Document resolved conflicts in ITEM-XXX.md
 
 ### With Context Engineering
-- Fresh context per phase
-- Summary at transitions
-- Reference files, don't inline
+- Fresh context per task
+- Coordinator stays under 40%
+- Spawn fresh agents when approaching threshold

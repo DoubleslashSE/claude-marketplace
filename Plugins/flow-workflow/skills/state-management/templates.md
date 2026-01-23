@@ -1,495 +1,302 @@
 # State File Templates
 
-## BACKLOG.md Template
+## FLOW.md Template (Project-Level)
 
 ```markdown
-# Work Item Backlog
+# Flow Project State
 
 **Created**: [TIMESTAMP]
 **Last Updated**: [TIMESTAMP]
-**Total Items**: [N]
-
-## Backlog Summary
-
-| Status | Count |
-|--------|-------|
-| BACKLOG | [N] |
-| DISCUSS | [N] |
-| PLAN | [N] |
-| EXECUTE | [N] |
-| VERIFY | [N] |
-| ON_HOLD | [N] |
-| BLOCKED | [N] |
-| COMPLETE | [N] |
-
-## Active Item
-
-**Current**: [ITEM-XXX] - [Title] (or "None")
-
-## Work Items
-
-### ITEM-001: [Title]
-**Status**: [BACKLOG | DISCUSS | PLAN | EXECUTE | VERIFY | COMPLETE | ON_HOLD | BLOCKED]
-**Priority**: [P0 | P1 | P2 | P3]
-**Created**: [TIMESTAMP]
-**Updated**: [TIMESTAMP]
-**Description**: [Brief description of the work item]
-**Phase Progress**: [0-100]%
-**Tags**: [tag1, tag2]
-
-### ITEM-002: [Title]
-**Status**: [status]
-**Priority**: [priority]
-**Created**: [TIMESTAMP]
-**Updated**: [TIMESTAMP]
-**Description**: [Brief description]
-**Phase Progress**: [0-100]%
-**Tags**: [tags]
-
-## Completed Items
-
-### ITEM-000: [Title]
-**Completed**: [TIMESTAMP]
-**Duration**: [time from creation to completion]
-**Summary**: [What was delivered]
-
-## Backlog Views
-
-### By Priority
-#### P0 - Critical
-- ITEM-XXX: [Title] ([Status])
-
-#### P1 - High
-- ITEM-XXX: [Title] ([Status])
-
-#### P2 - Medium
-- ITEM-XXX: [Title] ([Status])
-
-#### P3 - Low
-- ITEM-XXX: [Title] ([Status])
-
-### By Status
-#### In Progress (DISCUSS/PLAN/EXECUTE/VERIFY)
-- ITEM-XXX: [Title] ([Phase] - [Progress]%)
-
-#### Ready to Start (BACKLOG)
-- ITEM-XXX: [Title]
-
-#### Blocked/On Hold
-- ITEM-XXX: [Title] - [Reason]
-```
-
-## ACTIVE.md Template
-
-```markdown
-# Active Work Item
-
-**Current Item**: [ITEM-XXX] (or "None")
-**Switched At**: [TIMESTAMP]
-
-## Quick Context
-
-**Title**: [Work item title]
-**Status**: [Current phase]
-**Progress**: [Phase progress]%
-
-**Last Checkpoint**: [CHECKPOINT-ID]
-**Next Action**: [What to do next]
-
-## Recent Items
-
-| Item | Title | Last Active | Status |
-|------|-------|-------------|--------|
-| ITEM-XXX | [Title] | [TIMESTAMP] | [Status] |
-| ITEM-YYY | [Title] | [TIMESTAMP] | [Status] |
-
-## Switch History
-
-| Timestamp | From | To | Reason |
-|-----------|------|-----|--------|
-| [TS] | ITEM-XXX | ITEM-YYY | [reason] |
-```
-
-## STATE.md Template (Per-Item)
-
-```markdown
-# Workflow State
-
-**Session Started**: [TIMESTAMP]
-**Last Updated**: [TIMESTAMP]
-
-## Current Phase
-
-**Phase**: [INIT | DISCUSS | PLAN | EXECUTE | VERIFY | COMPLETE]
-**Started**: [TIMESTAMP]
-**Progress**: [0-100]%
-
-## Session Context
-
-**Original Request**:
-> [User's original request or goal]
-
-**Goals**:
-1. [Primary goal]
-2. [Secondary goal]
-
-**Constraints**:
-- [Constraint 1]
-- [Constraint 2]
-
-## Decisions
-
-### DECISION-001: [Title]
-**Made**: [TIMESTAMP]
-**Phase**: [DISCUSS | PLAN]
-**Decision**: [What was decided]
-**Rationale**: [Why this decision]
-**Alternatives Considered**:
-- [Alternative 1]: [Why rejected]
-- [Alternative 2]: [Why rejected]
-
-## Conflicts
-
-### CONFLICT-001: [Title]
-**Status**: [ACTIVE | RESOLVED | DEFERRED]
-**Detected**: [TIMESTAMP]
-**Type**: [Requirement | Decision | Plan | Technical]
-
-**What conflicts:**
-- A: [First item]
-- B: [Second item]
-
-**Why they conflict:**
-[Explanation]
-
-**Resolution options:**
-1. [Option 1]
-2. [Option 2]
-
-**Resolution**: [PENDING | Chose option X]
-**Rationale**: [Why this resolution]
-**Resolved**: [TIMESTAMP]
-
-## Blockers
-
-### BLOCKER-001: [Title]
-**Status**: [ACTIVE | RESOLVED]
-**Detected**: [TIMESTAMP]
-**Impact**: [What's blocked]
-**Resolution**: [How resolved or pending action]
-
-## Checkpoints
-
-### CHECKPOINT: [PHASE]-[TIMESTAMP]
-**Phase**: [Phase name]
-**Completed**:
-- [x] [Completed item 1]
-- [x] [Completed item 2]
-
-**Pending**:
-- [ ] [Pending item 1]
-- [ ] [Pending item 2]
-
-**Next Action**: [What to do next]
-
-**State Snapshot**:
-```
-[Key state values at checkpoint]
-```
-
-## Available Capabilities
-
-| Capability | Matched Plugin | Agent/Command |
-|------------|----------------|---------------|
-| [capability] | [plugin-name] | [agent:name or command] |
-
-**Project Type**: [Detected type or "Not detected"]
-**Last Scanned**: [TIMESTAMP]
-
-## Phase History
-
-| Phase | Started | Completed | Duration |
-|-------|---------|-----------|----------|
-| INIT | [TS] | [TS] | [duration] |
-| DISCUSS | [TS] | [TS] | [duration] |
-```
-
-## PROJECT.md Template
-
-```markdown
-# Project Overview
-
-**Created**: [TIMESTAMP]
-**Last Updated**: [TIMESTAMP]
+**Project Type**: [detected type or "Not detected"]
 
 ## Vision
 
-[High-level project vision statement]
+[High-level project vision statement - set during initialization or first item]
 
-## Scope
+## Backlog
 
-### In Scope
-- [Feature/capability 1]
-- [Feature/capability 2]
+| ID | Name | Status | Priority | Progress |
+|----|------|--------|----------|----------|
+| ITEM-001 | [Title] | EXECUTE | P1 | 60% |
+| ITEM-002 | [Title] | DISCUSS | P2 | 25% |
+| ITEM-003 | [Title] | BACKLOG | P3 | 0% |
 
-### Out of Scope
-- [Explicitly excluded item 1]
-- [Explicitly excluded item 2]
+**Summary**: 1 executing, 1 discussing, 1 in backlog, 0 done
 
-## Stakeholders
+## Active Item
 
-| Role | Interest | Key Concerns |
-|------|----------|--------------|
-| [Role] | [What they care about] | [Main concerns] |
-
-## Success Criteria
-
-- [ ] [Criterion 1]
-- [ ] [Criterion 2]
-
-## Technical Context
-
-**Stack**: [Technologies/frameworks]
-**Repository**: [Path or URL]
-**Key Files**:
-- `[path]`: [Purpose]
-
-## Constraints
-
-### Technical Constraints
-- [Constraint 1]
-
-### Business Constraints
-- [Constraint 1]
-
-### Timeline
-[Any timeline considerations]
-```
-
-## REQUIREMENTS.md Template
-
-```markdown
-# Requirements
-
-**Created**: [TIMESTAMP]
-**Last Updated**: [TIMESTAMP]
-**Status**: [DRAFT | REVIEWED | APPROVED]
-
-## Functional Requirements
-
-### FR-001: [Title]
-**Priority**: [MUST | SHOULD | COULD | WONT]
-**Status**: [PENDING | PLANNED | IMPLEMENTED | VERIFIED]
-**Description**: [What the system must do]
-**Acceptance Criteria**:
-- [ ] [Criterion 1]
-- [ ] [Criterion 2]
-**Source**: [DECISION-XXX or stakeholder]
-**Tasks**: [TASK-XXX, TASK-YYY]
-
-## Non-Functional Requirements
-
-### NFR-001: [Title]
-**Category**: [Performance | Security | Usability | Reliability]
-**Priority**: [MUST | SHOULD | COULD]
-**Description**: [Quality attribute requirement]
-**Metric**: [How to measure]
-**Target**: [Specific target value]
-
-## Requirement Traceability
-
-| Requirement | Source | Tasks | Status |
-|-------------|--------|-------|--------|
-| FR-001 | DECISION-001 | TASK-001, TASK-002 | PLANNED |
-
-## Open Questions
-
-- [ ] [Question 1]
-- [ ] [Question 2]
-```
-
-## ROADMAP.md Template
-
-```markdown
-# Roadmap
-
-**Created**: [TIMESTAMP]
-**Last Updated**: [TIMESTAMP]
-
-## Milestones
-
-### M1: [Milestone Name]
-**Target**: [Date or "Next"]
-**Status**: [NOT_STARTED | IN_PROGRESS | COMPLETED]
-**Description**: [What this milestone delivers]
-
-**Deliverables**:
-- [ ] [Deliverable 1]
-- [ ] [Deliverable 2]
-
-**Tasks**:
-- [ ] TASK-001: [Name]
-- [ ] TASK-002: [Name]
-
-**Progress**: [0-100]%
-
-## Progress Summary
-
-| Milestone | Tasks | Completed | Progress |
-|-----------|-------|-----------|----------|
-| M1 | 5 | 2 | 40% |
-
-## Timeline
-
-```
-[Current] ─── M1 ─── M2 ─── M3 ─── [Done]
-              ↑
-           You are here
-```
-
-## Risks
-
-### RISK-001: [Title]
-**Probability**: [LOW | MEDIUM | HIGH]
-**Impact**: [LOW | MEDIUM | HIGH]
-**Mitigation**: [Strategy]
-```
-
-## EXPLORATION.md Template
-
-```markdown
-# Exploration Map
-
-**Topic**: [What we're discussing]
+**Current**: ITEM-001
+**Title**: [Work item title]
+**Phase**: EXECUTE (task 3/5)
 **Started**: [TIMESTAMP]
-**Last Updated**: [TIMESTAMP]
-**Status**: [IN_PROGRESS | COMPLETE]
 
-## Territory Map
+## Capabilities Cache
 
-```
-[MAIN TOPIC]
-├── ✓ EXPLORED: [Area 1]
-│   ├── ✓ [Sub-area 1.1] - [Summary of findings]
-│   └── ◐ PARTIAL: [Sub-area 1.2] - [What we know, what's unclear]
-├── → CURRENT: [Area 2]
-│   └── ○ UNCHARTED: [Sub-area 2.1]
-├── ○ UNCHARTED: [Area 3]
-│   └── [Suspected topics to explore]
-└── ⊘ SKIPPED: [Area 4] - [Reason skipped]
-```
+**Last Scanned**: [TIMESTAMP]
 
-## Status Legend
-- ✓ EXPLORED: Fully discussed, decisions made
-- ◐ PARTIAL: Started but incomplete
-- → CURRENT: Currently exploring
-- ○ UNCHARTED: Identified but not yet explored
-- ⊘ SKIPPED: User chose to skip (with reason)
-- ⚑ FLAGGED: Needs follow-up or has blockers
+| Capability | Matched Plugin | Agent/Command | Confidence |
+|------------|----------------|---------------|------------|
+| requirements-gathering | business-analyst | stakeholder-interviewer | High |
+| tdd-implementation | dotnet-tdd | implementer | High |
+| code-review | dotnet-tdd | reviewer | High |
+| codebase-analysis | business-analyst | codebase-analyzer | Medium |
+| brainstorming | workshop-facilitator | brainstorm | High |
+| infrastructure | - | (use default) | - |
 
-## Exploration Log
+**Default Agents** (when no plugin matches):
+- requirements-gathering → flow-workflow:defaults/interviewer
+- codebase-analysis → flow-workflow:defaults/researcher
+- code-implementation → flow-workflow:defaults/executor
+- code-review → flow-workflow:validator
 
-### [TIMESTAMP] - [Area]
-**Status**: [EXPLORED | PARTIAL | SKIPPED]
-**Findings**:
-- [Key finding 1]
-- [Key finding 2]
+## Context Monitor
 
-**Decisions Made**:
-- DECISION-XXX: [Summary]
+- Coordinator usage: [X]%
+- Auto-spawn threshold: 50%
+- Fresh agents spawned this session: [N]
 
-**Questions Raised**:
-- [Question 1]
+## Quick Commands
 
-**Next**: [What to explore next]
-
-## Summary of Findings
-
-### [Area 1]
-[Consolidated findings from exploration]
-
-### [Area 2]
-[Consolidated findings from exploration]
-
-## Uncharted Territory
-
-Areas identified but not yet explored:
-1. [Area] - [Why identified, suspected relevance]
-2. [Area] - [Why identified, suspected relevance]
-
-## Skipped Areas
-
-| Area | Reason Skipped | Revisit Later? |
-|------|----------------|----------------|
-| [Area] | [Reason] | [Yes/No] |
+- `/flow:go` - Continue from current state
+- `/flow:status` - Show detailed status
+- `/flow:start [name]` - Create/switch to item
+- `/flow:backlog` - List all items
+- `/flow:quick "task"` - Direct execution (no state)
 ```
 
-## PLAN.md Template
+## ITEM-XXX.md Template (Per-Item)
 
 ```markdown
-# Execution Plan
+# ITEM-001: [Work Item Title]
 
 **Created**: [TIMESTAMP]
 **Last Updated**: [TIMESTAMP]
-**Status**: [DRAFT | APPROVED | IN_PROGRESS | COMPLETED]
 
-## Plan Summary
+## Phase: EXECUTE (task 3/5)
 
-**Total Tasks**: [N]
-**Completed**: [M]
-**Progress**: [%]
+**Phase Progress**: 60%
+**Current Task**: TASK-003 - Implement validation logic
 
-## Cross-Plan Verification
+### Phase History
 
-**Against REQUIREMENTS.md:**
-- [x] All requirements have at least one task
-- [x] No tasks contradict requirements
-- [x] Priority order respected
+| Phase | Started | Completed | Duration |
+|-------|---------|-----------|----------|
+| DISCUSS | [TS] | [TS] | 15m |
+| PLAN | [TS] | [TS] | 10m |
+| EXECUTE | [TS] | - | - |
 
-**Against STATE.md decisions:**
-- [x] Tasks align with recorded decisions
-- [x] No tasks contradict decisions
+## Decisions
+
+### DEC-001: Authentication Method
+**Made**: [TIMESTAMP]
+**Phase**: DISCUSS
+**Decision**: Use OAuth2 with Google/GitHub providers
+**Rationale**: User preference for social login, reduces password management burden
+**Alternatives Rejected**:
+- Email/password: User didn't want to manage passwords
+- Magic links: Requires email service setup
+
+### DEC-002: Token Storage
+**Made**: [TIMESTAMP]
+**Phase**: DISCUSS
+**Decision**: JWT stored in httpOnly cookies
+**Rationale**: Better security than localStorage, CSRF protection via SameSite
+
+## Requirements
+
+### Functional
+
+**FR-001**: User can authenticate via Google OAuth
+- Priority: MUST
+- Status: IMPLEMENTING
+- Acceptance: User clicks "Sign in with Google" and is authenticated
+
+**FR-002**: User can authenticate via GitHub OAuth
+- Priority: MUST
+- Status: PENDING
+- Acceptance: User clicks "Sign in with GitHub" and is authenticated
+
+**FR-003**: Session persists across browser refresh
+- Priority: MUST
+- Status: PENDING
+- Acceptance: User remains logged in after page reload
+
+### Non-Functional
+
+**NFR-001**: Authentication completes in under 3 seconds
+- Category: Performance
+- Status: PENDING
 
 ## Tasks
 
-<task id="TASK-001" status="pending">
-  <name>[Task name]</name>
-  <description>[What this task accomplishes]</description>
-  <depends>[TASK-XXX, TASK-YYY]</depends>
+<task id="TASK-001" status="completed">
+  <name>Set up OAuth providers configuration</name>
+  <description>Configure Google and GitHub OAuth credentials</description>
   <files>
-    <file action="create">[path/to/new/file]</file>
-    <file action="modify">[path/to/existing/file]</file>
+    <file action="create">src/config/oauth.ts</file>
+    <file action="modify">src/config/index.ts</file>
   </files>
   <actions>
-    <action>[Specific action 1]</action>
-    <action>[Specific action 2]</action>
+    <action>Create OAuth configuration structure</action>
+    <action>Add environment variable mappings</action>
   </actions>
   <verify>
-    <step>[Verification command or check]</step>
-    <step>[Another verification]</step>
+    <step>npm run build</step>
+    <step>Config exports correctly</step>
   </verify>
   <done>
-    <criterion>[Completion criterion 1]</criterion>
-    <criterion>[Completion criterion 2]</criterion>
+    <criterion>OAuth config is importable</criterion>
   </done>
-  <commit>[Conventional commit message]</commit>
+  <commit>feat(auth): add OAuth provider configuration</commit>
 </task>
 
-## Task Dependencies
+<task id="TASK-002" status="completed">
+  <name>Create AuthService base class</name>
+  <description>Implement core authentication service</description>
+  <files>
+    <file action="create">src/services/AuthService.ts</file>
+  </files>
+  <actions>
+    <action>Create AuthService class</action>
+    <action>Add login/logout methods</action>
+    <action>Add token management</action>
+  </actions>
+  <verify>
+    <step>npm test -- AuthService</step>
+  </verify>
+  <done>
+    <criterion>AuthService tests pass</criterion>
+  </done>
+  <commit>feat(auth): implement AuthService with login/logout</commit>
+</task>
+
+<task id="TASK-003" status="in_progress">
+  <name>Implement validation logic</name>
+  <description>Add token validation and refresh</description>
+  <files>
+    <file action="modify">src/services/AuthService.ts</file>
+  </files>
+  <actions>
+    <action>Add token validation</action>
+    <action>Add token refresh logic</action>
+  </actions>
+  <verify>
+    <step>npm test -- AuthService</step>
+  </verify>
+  <done>
+    <criterion>Validation tests pass</criterion>
+  </done>
+  <commit>feat(auth): add token validation and refresh</commit>
+</task>
+
+<task id="TASK-004" status="pending">
+  <name>Add Google OAuth integration</name>
+  <depends>TASK-003</depends>
+  ...
+</task>
+
+<task id="TASK-005" status="pending">
+  <name>Add GitHub OAuth integration</name>
+  <depends>TASK-003</depends>
+  ...
+</task>
+
+### Task Progress
 
 ```
-TASK-001 ──┬── TASK-003
-           │
-TASK-002 ──┘
-           │
-           └── TASK-004 ── TASK-005
+[====================----------] 60% (3/5 tasks)
+TASK-001 ✓ → TASK-002 ✓ → TASK-003 ● → TASK-004 ○ → TASK-005 ○
 ```
 
-## Execution Order
+## Checkpoint
 
-1. [ ] TASK-001: [Name] (no dependencies)
-2. [ ] TASK-002: [Name] (no dependencies)
-3. [ ] TASK-003: [Name] (depends: TASK-001, TASK-002)
-4. [ ] TASK-004: [Name] (depends: TASK-003)
-5. [ ] TASK-005: [Name] (depends: TASK-004)
+**Timestamp**: [TIMESTAMP]
+**Phase**: EXECUTE
+**Task**: TASK-003 (in_progress)
+**Context**: 32%
+
+**Completed**:
+- [x] OAuth configuration created
+- [x] AuthService base implemented
+- [x] Started validation logic
+
+**Next Action**: Complete token validation in TASK-003, then run verification
+
+**Resume Command**: `/flow:go` will continue from TASK-003
+
+## Blockers
+
+[No active blockers]
+
+## Notes
+
+- User prefers minimal UI during auth flow
+- Consider rate limiting after MVP
+```
+
+## Minimal ITEM-XXX.md (For New Items)
+
+```markdown
+# ITEM-001: [Title]
+
+**Created**: [TIMESTAMP]
+**Last Updated**: [TIMESTAMP]
+
+## Phase: DISCUSS (0%)
+
+Starting requirements exploration.
+
+## Decisions
+
+[No decisions yet - beginning DISCUSS phase]
+
+## Requirements
+
+[To be gathered during DISCUSS phase]
+
+## Tasks
+
+[To be created during PLAN phase]
+
+## Checkpoint
+
+**Timestamp**: [TIMESTAMP]
+**Phase**: DISCUSS
+**Progress**: 0%
+**Next Action**: Begin requirements exploration with interviewer
+```
+
+## Quick Mode ITEM-XXX.md
+
+```markdown
+# ITEM-001: [Task Description]
+
+**Created**: [TIMESTAMP]
+**Mode**: QUICK
+
+## Phase: EXECUTE (0%)
+
+**Task**: [task description]
+
+## Quick Tasks
+
+<task id="TASK-001" status="pending">
+  <name>[task name]</name>
+  <files>
+    <file action="[action]">[path]</file>
+  </files>
+  <actions>
+    <action>[action]</action>
+  </actions>
+  <verify>
+    <step>[verification]</step>
+  </verify>
+  <commit>[commit message]</commit>
+</task>
+
+## Checkpoint
+
+**Phase**: EXECUTE
+**Task**: TASK-001
+**Next**: Execute task and verify
 ```

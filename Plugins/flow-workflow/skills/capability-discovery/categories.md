@@ -2,7 +2,7 @@
 
 ## Overview
 
-Capability categories provide an abstraction layer between workflow phases and specific plugin implementations. This enables technology-agnostic orchestration.
+Capability categories provide an abstraction layer between workflow phases and specific plugin implementations. This enables technology-agnostic orchestration with transparent delegation.
 
 ## Category Definitions
 
@@ -21,10 +21,7 @@ Capability categories provide an abstraction layer between workflow phases and s
 - Document non-functional requirements
 - Identify constraints and assumptions
 
-**Example Plugins**:
-- business-analyst (stakeholder-interviewer agent)
-
-**Fallback**: flow-workflow:interviewer
+**Default Agent**: `flow-workflow:defaults/interviewer`
 
 ---
 
@@ -43,10 +40,7 @@ Capability categories provide an abstraction layer between workflow phases and s
 - Find integration points
 - Document existing behavior
 
-**Example Plugins**:
-- business-analyst (codebase-analyzer agent)
-
-**Fallback**: flow-workflow:researcher
+**Default Agent**: `flow-workflow:defaults/researcher`
 
 ---
 
@@ -65,10 +59,7 @@ Capability categories provide an abstraction layer between workflow phases and s
 - Trade-off analysis
 - Convergent selection
 
-**Example Plugins**:
-- workshop-facilitator (brainstorm command)
-
-**Fallback**: flow-workflow:interviewer (with brainstorming prompts)
+**Default Agent**: `flow-workflow:defaults/interviewer` (with brainstorming prompts)
 
 ---
 
@@ -87,11 +78,7 @@ Capability categories provide an abstraction layer between workflow phases and s
 - Maintain test coverage
 - Follow clean code principles
 
-**Example Plugins**:
-- dotnet-tdd (implementer, test-designer agents)
-- node-tdd (implementer, test-designer agents)
-
-**Fallback**: flow-workflow:executor (with TDD guidance)
+**Default Agent**: `flow-workflow:defaults/executor` (with TDD guidance)
 
 ---
 
@@ -110,11 +97,7 @@ Capability categories provide an abstraction layer between workflow phases and s
 - Integrate with existing code
 - Document as needed
 
-**Example Plugins**:
-- dotnet-developer (developer agent)
-- Any plugin with "developer" or "implementer" agents
-
-**Fallback**: flow-workflow:executor
+**Default Agent**: `flow-workflow:defaults/executor`
 
 ---
 
@@ -124,7 +107,7 @@ Capability categories provide an abstraction layer between workflow phases and s
 
 **When Used**: EXECUTE phase, for deployment and operations
 
-**Keywords**: `infra`, `devops`, `pipeline`, `deploy`, `docker`, `kubernetes`, `ci`, `cd`, `terraform`
+**Keywords**: `infra`, `devops`, `pipeline`, `deploy`, `docker`, `kubernetes`, `ci`, `cd`, `terraform`, `azure`
 
 **Expected Behaviors**:
 - Configure build pipelines
@@ -133,11 +116,7 @@ Capability categories provide an abstraction layer between workflow phases and s
 - Set up environments
 - Configure monitoring
 
-**Example Plugins**:
-- devops-azure-infrastructure
-- infra-plugin
-
-**Fallback**: flow-workflow:executor (with infrastructure guidance)
+**Default Agent**: `flow-workflow:defaults/executor` (with infrastructure guidance)
 
 ---
 
@@ -156,11 +135,7 @@ Capability categories provide an abstraction layer between workflow phases and s
 - Suggest improvements
 - Validate best practices
 
-**Example Plugins**:
-- dotnet-tdd (reviewer agent)
-- node-tdd (reviewer agent)
-
-**Fallback**: flow-workflow:verifier
+**Default Agent**: `flow-workflow:validator`
 
 ---
 
@@ -179,10 +154,7 @@ Capability categories provide an abstraction layer between workflow phases and s
 - Conduct UAT
 - Document compliance
 
-**Example Plugins**:
-- business-analyst (validator agent)
-
-**Fallback**: flow-workflow:verifier
+**Default Agent**: `flow-workflow:validator`
 
 ---
 
@@ -195,9 +167,18 @@ Capability categories provide an abstraction layer between workflow phases and s
 2. Partial match (word contains keyword): +3 points
 3. Keyword in first sentence: +5 bonus
 4. Multiple keywords from same category: +2 each after first
+5. Project type match: +10 bonus
 ```
 
-### Matching Examples
+### Confidence Levels
+
+| Score | Confidence | Meaning |
+|-------|------------|---------|
+| 25+ | High | Strong match, safe to delegate |
+| 15-24 | Medium | Good match, may need verification |
+| <15 | Low | Weak match, consider default |
+
+### Matching Example
 
 **Description**: "TDD implementation specialist for .NET. Write minimal code that makes tests pass."
 
@@ -209,8 +190,8 @@ Keyword matches:
 - ".NET" → (project type indicator)
 
 Scores:
-- tdd-implementation: 20 + 5 (first sentence) = 25
-- code-implementation: 10
+- tdd-implementation: 20 + 5 (first sentence) = 25 (High)
+- code-implementation: 10 (Low)
 
 Winner: tdd-implementation
 ```
@@ -231,7 +212,7 @@ Matches:
 
 Detected project type: dotnet
 
-Selected: dotnet-tdd:implementer
+Selected: dotnet-tdd:implementer (+10 project bonus)
 ```
 
 ### Project Type Keywords
@@ -247,29 +228,73 @@ Selected: dotnet-tdd:implementer
 
 ---
 
-## Capability Gaps
+## Default Agent Summary
 
-### Logging Unmatched Capabilities
+| Capability | Default Agent | Why |
+|------------|---------------|-----|
+| requirements-gathering | defaults/interviewer | General interview skills |
+| brainstorming | defaults/interviewer | Facilitation skills overlap |
+| codebase-analysis | defaults/researcher | General research skills |
+| tdd-implementation | defaults/executor | TDD guidance built in |
+| code-implementation | defaults/executor | General coding skills |
+| infrastructure | defaults/executor | Infra guidance built in |
+| code-review | validator | Review is built-in function |
+| requirements-validation | validator | UAT is built-in function |
 
-When no plugin matches a capability:
+---
 
-```markdown
-## Capability Warnings
+## Capability Gap Handling
 
-**[TIMESTAMP]**: No plugin found for capability 'infrastructure'
-- Searched: [list of plugins scanned]
-- Keywords tried: [list of keywords]
-- Using fallback: flow-workflow:executor
-- Recommendation: Consider installing an infrastructure plugin
-```
+### When No Plugin Matches
 
-### Suggesting Plugins
+1. Log warning to FLOW.md with timestamp
+2. Announce to user: "Using built-in agent (no plugin matched)"
+3. Use appropriate default agent
+4. Suggest plugin installation if capability is important
 
-Based on detected gaps, suggest relevant plugins:
+### Suggested Plugins by Capability
 
 | Missing Capability | Suggested Plugin Type |
 |-------------------|----------------------|
 | requirements-gathering | business-analyst |
-| tdd-implementation | dotnet-tdd, node-tdd |
 | brainstorming | workshop-facilitator |
-| infrastructure | devops plugin |
+| codebase-analysis | business-analyst |
+| tdd-implementation | dotnet-tdd, node-tdd |
+| code-implementation | developer plugin for project type |
+| infrastructure | devops-azure-infrastructure, infra-plugin |
+| code-review | tdd plugin with reviewer |
+| requirements-validation | business-analyst |
+
+---
+
+## Delegation Announcement Templates
+
+### Plugin Match
+
+```markdown
+**Delegating requirements-gathering** → business-analyst:stakeholder-interviewer
+
+Matched via keyword scoring:
+- Keywords: requirements, interview, stakeholder
+- Score: 30 (High confidence)
+- Project type: dotnet (neutral)
+```
+
+### Default Agent
+
+```markdown
+**Using built-in agent** for infrastructure → flow-workflow:defaults/executor
+
+No installed plugin matched this capability.
+- Searched: 5 plugins
+- Keywords tried: infra, devops, pipeline, deploy
+
+Consider installing: devops-azure-infrastructure or similar
+```
+
+### Short Form (For Logs)
+
+```
+→ requirements-gathering: business-analyst:stakeholder-interviewer (keyword match)
+→ infrastructure: defaults/executor (no plugin match)
+```

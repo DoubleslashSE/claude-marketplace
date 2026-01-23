@@ -1,243 +1,229 @@
 ---
 name: backlog
-description: List and manage work items in the backlog. View status, filter by state, and get overview of all planned work.
+description: List and filter work items from FLOW.md backlog
 user_invocable: true
-args: "[filter]"
+args: "[--status STATUS] [--priority P0|P1|P2|P3]"
 ---
 
-# Backlog Management
+# Backlog Command
 
-You are viewing and managing the work item backlog. This command displays all work items and their current status.
+Display and filter work items from the FLOW.md backlog.
 
-## Arguments
+## Usage
 
-- No args: Show full backlog overview
-- `active`: Show only in-progress items (DISCUSS/PLAN/EXECUTE/VERIFY)
-- `ready`: Show items ready to start (BACKLOG status)
-- `blocked`: Show blocked or on-hold items
-- `complete`: Show completed items
-- `[ITEM-XXX]`: Show details for specific item
+```
+/flow:backlog                    # Show all items
+/flow:backlog --status EXECUTE   # Filter by status
+/flow:backlog --priority P0      # Filter by priority
+/flow:backlog --status BACKLOG --priority P1  # Combined filter
+```
 
-## What to Do
+## Available Filters
 
-1. **Read BACKLOG.md** to get all work items
-2. **Apply filter** if specified
-3. **Display formatted backlog** to user
-4. **Show active item** prominently
-5. **Suggest actions** based on backlog state
+### Status Filter
 
-## Backlog Display
+| Status | Description |
+|--------|-------------|
+| `BACKLOG` | Not started |
+| `DISCUSS` | In requirements gathering |
+| `PLAN` | Creating task plan |
+| `EXECUTE` | Implementing |
+| `VERIFY` | Validating |
+| `DONE` | Completed |
+| `ON_HOLD` | Paused |
+| `BLOCKED` | Waiting on dependency |
 
-### Full Overview (No Filter)
+### Priority Filter
+
+| Priority | Description |
+|----------|-------------|
+| `P0` | Critical |
+| `P1` | High |
+| `P2` | Medium |
+| `P3` | Low |
+
+## Output Format
+
+### Full Backlog (No Filters)
 
 ```markdown
 # Work Item Backlog
 
-**Active**: [ITEM-XXX] - [Title] ([Phase])
+**Total**: 6 items
+**Active**: ITEM-001
 
 ## Summary
 
 | Status | Count |
 |--------|-------|
-| In Progress | [N] |
-| Ready | [N] |
-| Blocked | [N] |
-| Complete | [N] |
+| EXECUTE | 1 |
+| BACKLOG | 2 |
+| DONE | 3 |
 
 ## In Progress
 
-| Item | Title | Phase | Progress |
-|------|-------|-------|----------|
-| ITEM-001 | [Title] | EXECUTE | 60% |
-| ITEM-002 | [Title] | DISCUSS | 30% |
+### ITEM-001: Add user authentication ⬅ ACTIVE
+**Status**: EXECUTE (task 3/5)
+**Priority**: P1
+**Progress**: 60%
+**Phase**: Implementing validation logic
+
+### ITEM-004: Fix cart calculation
+**Status**: DISCUSS
+**Priority**: P0
+**Progress**: 25%
+**Phase**: Gathering requirements
 
 ## Ready to Start
 
-| Item | Title | Priority | Created |
-|------|-------|----------|---------|
-| ITEM-003 | [Title] | P1 | [date] |
-| ITEM-004 | [Title] | P2 | [date] |
+### ITEM-002: Dashboard improvements
+**Priority**: P2
+**Created**: 2024-01-20
 
-## Blocked/On Hold
+### ITEM-003: User profile page
+**Priority**: P3
+**Created**: 2024-01-21
 
-| Item | Title | Reason | Since |
-|------|-------|--------|-------|
-| ITEM-005 | [Title] | Waiting on API | [date] |
+## Completed
 
-## Recently Completed
+### ITEM-005: Login page redesign ✓
+**Completed**: 2024-01-22
+**Duration**: 2 days
 
-| Item | Title | Completed |
-|------|-------|-----------|
-| ITEM-000 | [Title] | [date] |
+### ITEM-006: API rate limiting ✓
+**Completed**: 2024-01-21
+**Duration**: 1 day
 
-## Actions
+---
 
-- `/flow-workflow:new [title]` - Create new work item
-- `/flow-workflow:switch ITEM-XXX` - Switch to item
-- `/flow-workflow:flow` - Continue active item
+**Commands**:
+- `/flow:start ITEM-XXX` - Switch to item
+- `/flow:go` - Continue active item
+- `/flow:start "name"` - Create new item
 ```
 
-### Active Items Filter
+### Filtered Backlog
 
 ```markdown
-# Active Work Items
+# Backlog: EXECUTE Status
 
-| Item | Title | Phase | Progress | Last Updated |
-|------|-------|-------|----------|--------------|
-| ITEM-001 | [Title] | EXECUTE | 60% | [timestamp] |
-| ITEM-002 | [Title] | DISCUSS | 30% | [timestamp] |
+**Filter**: status=EXECUTE
+**Results**: 1 item
 
-**Currently Active**: ITEM-001
+### ITEM-001: Add user authentication ⬅ ACTIVE
+**Priority**: P1
+**Progress**: 60%
+**Current Task**: TASK-003 - Implement validation
 
-To switch: `/flow-workflow:switch ITEM-XXX`
+---
+
+**Other statuses**: BACKLOG (2), DONE (3)
+**Clear filter**: `/flow:backlog`
 ```
 
-### Ready Items Filter
+### By Priority
 
 ```markdown
-# Ready to Start
+# Backlog: P0 Priority
 
-| Item | Title | Priority | Description |
-|------|-------|----------|-------------|
-| ITEM-003 | [Title] | P1 | [Brief desc] |
-| ITEM-004 | [Title] | P2 | [Brief desc] |
+**Filter**: priority=P0
+**Results**: 1 item
 
-To start an item: `/flow-workflow:switch ITEM-XXX`
+### ITEM-004: Fix cart calculation
+**Status**: DISCUSS
+**Progress**: 25%
+**Note**: Critical bug affecting checkout
+
+---
+
+**Other priorities**: P1 (2), P2 (2), P3 (1)
 ```
 
-### Blocked Items Filter
+### Empty Results
 
 ```markdown
-# Blocked / On Hold
+# Backlog: BLOCKED Status
 
-### ITEM-005: [Title]
-**Status**: BLOCKED
-**Since**: [timestamp]
-**Reason**: [blocking reason]
-**Waiting for**: [what's needed]
+**Filter**: status=BLOCKED
+**Results**: 0 items
 
-### ITEM-006: [Title]
-**Status**: ON_HOLD
-**Since**: [timestamp]
-**Reason**: [why on hold]
-**Resume when**: [condition]
+No blocked items.
+
+**Suggestion**: View all items with `/flow:backlog`
 ```
 
-### Completed Items Filter
+## Reading from FLOW.md
+
+Extract backlog table:
 
 ```markdown
-# Completed Work Items
+## Backlog
 
-| Item | Title | Completed | Duration |
-|------|-------|-----------|----------|
-| ITEM-000 | [Title] | [date] | 3 days |
-
-### ITEM-000: [Title]
-**Completed**: [timestamp]
-**Summary**: [what was delivered]
-**Tasks**: [N] completed
-**Commits**: [N] created
+| ID | Name | Status | Priority | Progress |
+|----|------|--------|----------|----------|
+| ITEM-001 | Add auth | EXECUTE | P1 | 60% |
+| ITEM-002 | Dashboard | BACKLOG | P2 | 0% |
+...
 ```
 
-### Single Item Details
+Parse each row and apply filters.
+
+## Item Details
+
+For each item in output, show:
+
+**In Progress items:**
+- ID and title
+- Status with sub-status (task N/M)
+- Priority
+- Progress percentage
+- Current activity
+
+**Backlog items:**
+- ID and title
+- Priority
+- Created date
+
+**Completed items:**
+- ID and title (with ✓)
+- Completed date
+- Duration
+
+## Active Item Indicator
+
+Mark the active item with `⬅ ACTIVE`:
 
 ```markdown
-# ITEM-XXX: [Title]
+### ITEM-001: Add auth ⬅ ACTIVE
+```
 
-**Status**: [status]
-**Priority**: [priority]
-**Created**: [timestamp]
-**Updated**: [timestamp]
+## Not Initialized
 
-## Description
+If no FLOW.md:
 
-[Full description]
+```markdown
+**Workflow Not Initialized**
 
-## Current State
+No backlog exists yet.
 
-**Phase**: [phase]
-**Progress**: [X]%
-**Last Checkpoint**: [checkpoint-id]
-
-## Phase History
-
-| Phase | Started | Completed | Duration |
-|-------|---------|-----------|----------|
-| DISCUSS | [ts] | [ts] | [time] |
-| PLAN | [ts] | - | ongoing |
-
-## Key Decisions
-
-- DECISION-001: [summary]
-- DECISION-002: [summary]
-
-## Files
-
-- STATE.md: [path]
-- PLAN.md: [exists/not created]
-- REQUIREMENTS.md: [exists/not created]
-
-## Actions
-
-- `/flow-workflow:switch ITEM-XXX` - Make this active
-- `/flow-workflow:discuss` - Continue discussion
-- `/flow-workflow:plan` - Continue planning
+Initialize with: `/flow:start`
 ```
 
 ## Empty Backlog
 
-If no items exist:
+If FLOW.md exists but no items:
 
 ```markdown
 # Work Item Backlog
 
-**No work items yet.**
+**Total**: 0 items
 
-To create your first work item:
-```
-/flow-workflow:new [title]
-```
+No work items yet.
 
-Or start a full workflow:
-```
-/flow-workflow:flow [task description]
-```
+**Create one**: `/flow:start "item name"`
+**Quick task**: `/flow:quick "task"`
 ```
 
-## Backlog Not Initialized
+## Integration
 
-If `.flow/` doesn't exist:
-
-```markdown
-**Backlog Not Initialized**
-
-Run `/flow-workflow:init` first to set up the workflow system.
-```
-
-## Backlog Operations
-
-### Reorder Items (Future Enhancement)
-```markdown
-To change priority:
-1. Edit .flow/BACKLOG.md
-2. Update Priority field for item
-3. Backlog views will reflect new order
-```
-
-### Archive Completed Items
-```markdown
-Completed items remain in BACKLOG.md for reference.
-Item directories in .flow/items/ are preserved.
-```
-
-## Output Format
-
-Always show:
-1. Active item prominently at top
-2. Summary counts
-3. Relevant items based on filter
-4. Available actions
-
-## Skills Used
-
-- **state-management**: Reading backlog and item state
+Uses **state-management** skill to read FLOW.md backlog section.

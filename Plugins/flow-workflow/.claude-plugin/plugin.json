@@ -1,7 +1,7 @@
 {
   "name": "flow-workflow",
-  "description": "Technology-agnostic workflow management plugin providing structured phases (Discuss → Plan → Execute → Verify), explicit state management, atomic task execution, and built-in verification patterns",
-  "version": "1.0.0",
+  "description": "Lightweight meta-orchestrator that leverages your plugin ecosystem through capability-based routing, with simplified commands (5), consolidated state files (2), and smart continuation",
+  "version": "2.0.0",
   "author": {
     "name": "DoubleslashSE",
     "email": "info@doubleslash.se"

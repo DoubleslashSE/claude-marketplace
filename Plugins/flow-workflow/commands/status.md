@@ -1,303 +1,228 @@
 ---
 name: status
-description: Display current workflow state including backlog overview, active item, phase, progress, and blockers
+description: Show current workflow state, context budget, discovered capabilities, and active item progress
 user_invocable: true
+args: "[--refresh]"
 ---
 
-# Show Workflow Status
+# Status Command
 
-You are displaying the current state of the flow-workflow system, including backlog overview and active item details.
+Display comprehensive workflow status including active item, context budget, and discovered capabilities.
 
-## What to Do
+## Usage
 
-1. **Read BACKLOG.md** for backlog overview
-2. **Read ACTIVE.md** for current item
-3. **Read item's STATE.md** for active item details
-4. **Read item's PLAN.md** if exists for task progress
-5. **Display formatted status** to user
-6. **Suggest next actions** based on current state
+```
+/flow:status              # Show current status
+/flow:status --refresh    # Refresh capability cache and show status
+```
 
-## Status Display
+## What It Shows
 
-### Check for Initialization
-
-First, check if `.flow/` exists:
-- If not: Report "Not initialized. Run /flow-workflow:init first."
-- If yes: Continue reading state
-
-### Read State Files
-
-Read the following files:
-- `.flow/BACKLOG.md` - All work items
-- `.flow/ACTIVE.md` - Current active item
-- `.flow/items/ITEM-XXX/STATE.md` - Active item's state (if active)
-- `.flow/items/ITEM-XXX/PLAN.md` - Active item's tasks (if exists)
-
-### Full Status Display
+### 1. Active Item Status
 
 ```markdown
-# Flow Workflow Status
+## Active Item
 
-## Backlog Overview
+**Item**: ITEM-001 - Add user authentication
+**Phase**: EXECUTE (task 3/5)
+**Progress**: 60%
 
-| Status | Count |
-|--------|-------|
-| In Progress | [N] |
-| Ready | [N] |
-| Blocked | [N] |
-| Complete | [N] |
-| **Total** | [N] |
+**Current Task**: TASK-003 - Implement validation logic
+**Started**: 2024-01-23T10:30:00Z
 
-### Work Items at a Glance
+**Last Checkpoint**:
+- Phase: EXECUTE
+- Task: TASK-002 completed
+- Next: Continue to TASK-003
+```
 
-| Item | Title | Status | Progress |
-|------|-------|--------|----------|
-| → ITEM-001 | [Title] | EXECUTE | 60% |
-| ITEM-002 | [Title] | BACKLOG | 0% |
-| ITEM-003 | [Title] | COMPLETE | 100% |
+### 2. Context Budget
 
-(→ indicates active item)
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-## Active Item: ITEM-XXX
-
-**Title**: [Title]
-**Phase**: [CURRENT_PHASE]
-**Started**: [phase start time]
-**Progress**: [X]%
-
-### Quick Summary
+```markdown
+## Context Monitor
 
 | Metric | Value |
 |--------|-------|
-| Decisions made | [N] |
-| Active blockers | [N] |
-| Active conflicts | [N] |
-| Tasks total | [N] |
-| Tasks completed | [N] |
-| Tasks remaining | [N] |
+| Coordinator usage | 32% |
+| Auto-spawn threshold | 50% |
+| Fresh agents this session | 2 |
 
-### Current Phase Details
-
-[Phase-specific details]
-
-### Recent Activity
-
-- [TIMESTAMP]: [Activity 1]
-- [TIMESTAMP]: [Activity 2]
-
-### Blockers
-
-[List active blockers or "None"]
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-## Available Actions
-
-**For active item**:
-1. [Phase-appropriate action]
-2. [Alternative action]
-
-**For backlog**:
-- `/flow-workflow:backlog` - View full backlog
-- `/flow-workflow:new [title]` - Create new item
-- `/flow-workflow:switch ITEM-XXX` - Switch to different item
+**Status**: ✓ Within budget
 ```
 
-## No Active Item
-
-If no item is currently active:
+Or when approaching limit:
 
 ```markdown
-# Flow Workflow Status
+## Context Monitor
 
-## Backlog Overview
+| Metric | Value |
+|--------|-------|
+| Coordinator usage | 47% |
+| Auto-spawn threshold | 50% |
+| Fresh agents this session | 4 |
+
+**Status**: ⚠ Approaching threshold - will spawn fresh agent soon
+```
+
+### 3. Discovered Capabilities
+
+```markdown
+## Capabilities
+
+**Project Type**: dotnet
+**Last Scanned**: 2024-01-23T09:00:00Z
+
+| Capability | Plugin | Agent | Confidence |
+|------------|--------|-------|------------|
+| requirements-gathering | business-analyst | stakeholder-interviewer | High |
+| tdd-implementation | dotnet-tdd | implementer | High |
+| code-review | dotnet-tdd | reviewer | High |
+| codebase-analysis | business-analyst | codebase-analyzer | Medium |
+| brainstorming | workshop-facilitator | brainstorm | High |
+| infrastructure | - | (default) | - |
+| code-implementation | - | (default) | - |
+
+**Defaults in use**: 2 capabilities using built-in agents
+```
+
+### 4. Backlog Summary
+
+```markdown
+## Backlog Summary
 
 | Status | Count |
 |--------|-------|
-| In Progress | 0 |
-| Ready | [N] |
-| Blocked | [N] |
-| Complete | [N] |
-| **Total** | [N] |
+| In Progress | 1 |
+| Backlog | 2 |
+| Done | 3 |
+| **Total** | **6** |
 
-### Work Items
-
-| Item | Title | Status | Priority |
-|------|-------|--------|----------|
-| ITEM-001 | [Title] | BACKLOG | P1 |
-| ITEM-002 | [Title] | BACKLOG | P2 |
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-## No Active Item
-
-Select a work item to begin:
-- `/flow-workflow:switch ITEM-XXX` - Activate an existing item
-- `/flow-workflow:new [title] --start` - Create and start new item
-- `/flow-workflow:flow [task]` - Create item and run full workflow
+**Recent Items**:
+- ITEM-001: Add auth (EXECUTE 60%)
+- ITEM-002: Dashboard (BACKLOG)
+- ITEM-003: User profile (BACKLOG)
 ```
 
-## Empty Backlog
-
-If backlog is empty:
+## Full Output Format
 
 ```markdown
 # Flow Workflow Status
 
-## Backlog Overview
+## Active Item
 
-**No work items yet.**
+**Item**: ITEM-001 - [Title]
+**Phase**: [PHASE] ([progress])
+**Current**: [task or activity]
 
-Get started:
-- `/flow-workflow:new [title]` - Create a work item
-- `/flow-workflow:flow [task]` - Start full workflow
+**Checkpoint**:
+- [checkpoint details]
+
+---
+
+## Context Monitor
+
+- Coordinator: [X]%
+- Threshold: 50%
+- Fresh agents: [N]
+- Status: [✓ OK | ⚠ Warning]
+
+---
+
+## Capabilities
+
+**Project**: [type]
+**Scanned**: [timestamp]
+
+| Capability | Plugin | Confidence |
+|------------|--------|------------|
+[capability rows]
+
+**Gaps**: [N] using defaults
+
+---
+
+## Backlog
+
+| Status | Count |
+|--------|-------|
+[status counts]
+
+---
+
+## Quick Commands
+
+- `/flow:go` - Continue work
+- `/flow:start "name"` - New item
+- `/flow:backlog` - Full backlog
+- `/flow:quick "task"` - Quick execution
 ```
 
-## Phase-Specific Details
+## Refresh Option
 
-### BACKLOG Status (Item Not Started)
-```markdown
-### Status: BACKLOG
+When `--refresh` is provided:
 
-This item is defined but not yet started.
-
-**Created**: [timestamp]
-**Priority**: [priority]
-
-**To begin**: `/flow-workflow:discuss` or `/flow-workflow:flow`
-```
-
-### DISCUSS Phase
-```markdown
-### Phase: DISCUSS
-
-Gathering requirements and making decisions.
-
-**Exploration map**:
-- Areas explored: [N]
-- Areas uncharted: [N]
-- Current area: [name]
-
-**Decisions made**: [N]
-
-**Next**: Continue discussion or run `/flow-workflow:plan` when ready
-```
-
-### PLAN Phase
-```markdown
-### Phase: PLAN
-
-Creating execution plan.
-
-**Plan status**: [DRAFT/APPROVED/IN_PROGRESS]
-**Tasks defined**: [N]
-
-**Next**: Review plan and run `/flow-workflow:execute` to begin
-```
-
-### EXECUTE Phase
-```markdown
-### Phase: EXECUTE
-
-Implementing tasks.
-
-**Progress**:
-```
-[===========         ] 55% (11/20 tasks)
-```
-
-**Current task**: [TASK-XXX] - [name]
-**Completed**: [N]
-**Remaining**: [N]
-**Blocked**: [N]
-
-**Next**: Continue execution or check blocked tasks
-```
-
-### VERIFY Phase
-```markdown
-### Phase: VERIFY
-
-Validating implementation.
-
-**Automated checks**: [PASS/FAIL/PENDING]
-**Requirements verified**: [X/Y]
-**UAT status**: [PENDING/IN_PROGRESS/COMPLETE]
-
-**Next**: Complete verification or address issues
-```
-
-### COMPLETE Status
-```markdown
-### Status: COMPLETE
-
-Work item completed successfully.
-
-**Completed**: [timestamp]
-**Duration**: [time]
-**Summary**:
-- Tasks completed: [N]
-- Requirements verified: [N]
-
-**Actions**: Switch to another item or create new one
-```
-
-### ON_HOLD / BLOCKED Status
-```markdown
-### Status: [ON_HOLD/BLOCKED]
-
-**Since**: [timestamp]
-**Reason**: [reason]
-
-**To resume**: [what needs to happen]
-```
-
-## Task Progress (If in EXECUTE)
+1. Re-scan Plugins/ directory
+2. Rebuild capability map with fresh keyword matching
+3. Update FLOW.md capability cache
+4. Report any changes
 
 ```markdown
-## Task Progress
+**Capability Refresh**
 
-| Status | Count | Tasks |
-|--------|-------|-------|
-| Completed | [N] | TASK-001, TASK-002 |
-| In Progress | [N] | TASK-005 |
-| Pending | [N] | TASK-006, TASK-007 |
-| Blocked | [N] | TASK-004 |
+Scanned: [N] plugins
+Changes detected:
+- Added: [plugin:agent] → [capability]
+- Removed: [plugin:agent] (plugin uninstalled)
+- Updated: [plugin:agent] confidence changed
 
-### Current Task
-
-**TASK-XXX**: [name]
-**Status**: [status]
-**Actions remaining**: [N]
-**Dependencies**: [met/waiting on TASK-YYY]
+Cache updated in FLOW.md.
 ```
 
-## Blocker Display
+## Not Initialized
+
+If `.flow/FLOW.md` doesn't exist:
 
 ```markdown
-## Active Blockers
+**Workflow Not Initialized**
 
-### BLOCKER-001: [Title]
-**Type**: [type]
-**Impact**: [what's blocked]
-**Needs**: [what's needed to resolve]
+No .flow/ directory found.
+
+Initialize with: `/flow:start`
 ```
 
-## Available Actions by State
+## No Active Item
 
-| State | Suggested Actions |
-|-------|-------------------|
-| No active item | `/flow-workflow:switch`, `/flow-workflow:new --start` |
-| BACKLOG | `/flow-workflow:discuss`, `/flow-workflow:flow` |
-| DISCUSS in progress | Continue, `/flow-workflow:plan` |
-| PLAN ready | `/flow-workflow:execute` |
-| EXECUTE in progress | Continue, check blockers |
-| VERIFY pending | `/flow-workflow:verify` |
-| Blocked | Address blockers, `/flow-workflow:resume` |
-| Complete | `/flow-workflow:switch`, `/flow-workflow:new` |
+If initialized but no active item:
 
-## Skills Used
+```markdown
+## Active Item
 
-- **state-management**: For reading state files and backlog
+**Current**: None
+
+Start working:
+- `/flow:start "item name"` - Create new item
+- `/flow:start ITEM-XXX` - Resume existing item
+- `/flow:backlog` - View all items
+```
+
+## Reading State
+
+This command reads:
+
+1. **FLOW.md**:
+   - Active item pointer
+   - Backlog table
+   - Capabilities cache
+   - Project type
+
+2. **ITEM-XXX.md** (if active item):
+   - Current phase
+   - Phase progress
+   - Current task
+   - Checkpoint
+
+## Integration
+
+Uses:
+- **state-management** skill for reading files
+- **capability-discovery** skill for refresh

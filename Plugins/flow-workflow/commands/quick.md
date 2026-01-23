@@ -1,331 +1,147 @@
 ---
 name: quick
-description: Lightweight workflow path for small tasks that still maintains state tracking
+description: Direct task execution without state files - for small, well-defined tasks that don't need workflow tracking
 user_invocable: true
 args: "<task description>"
 ---
 
-# Quick Mode Workflow
+# Quick Command
 
-You are running a lightweight workflow for a small, well-defined task. Quick mode skips deep requirements gathering while still maintaining state tracking and backlog integration.
+Execute a small, well-defined task directly without creating state files. This is the lightweight path for tasks that don't need full workflow tracking.
+
+## Usage
+
+```
+/flow:quick "Fix the typo in README"
+/flow:quick "Add null check to getUserById"
+/flow:quick "Update the version to 2.0.0"
+```
 
 ## When to Use Quick Mode
 
-Quick mode is appropriate for:
+**Appropriate for:**
 - Single, well-defined changes
-- Bug fixes with clear scope
-- Small features with obvious requirements
-- Tasks that don't need extensive discussion
+- Bug fixes with obvious solutions
+- Small features with clear requirements
+- Tasks completable in <5 steps
+- No stakeholder discussion needed
 
-Quick mode is NOT appropriate for:
+**Not appropriate for:**
 - Complex features with unclear requirements
-- Changes that affect multiple systems
-- Work requiring stakeholder input
+- Changes affecting multiple systems
+- Work requiring extensive planning
 - Tasks with potential conflicts
 
 ## What Quick Mode Does
 
-1. **Create Work Item**: Add to backlog with QUICK mode marker
-2. **Minimal DISCUSS**: Ask clarifying questions only if needed
-3. **Rapid PLAN**: Create 1-3 atomic tasks
-4. **Focused EXECUTE**: Implement tasks
-5. **Quick VERIFY**: Run automated checks + brief UAT
-6. **Mark Complete**: Update backlog and close item
+1. **Assess task** - Verify it's suitable for quick mode
+2. **Clarify** (if needed) - Ask 1-2 critical questions max
+3. **Plan minimally** - Create 1-3 mental tasks
+4. **Execute directly** - Implement the change
+5. **Verify** - Run basic checks
+6. **Commit** - Create atomic commit
+7. **Done** - No state files created
 
-## Quick Flow
+## Execution Flow
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    QUICK MODE FLOW                               │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  1. CREATE WORK ITEM                                            │
-│     ├─ Generate ITEM-XXX                                        │
-│     ├─ Add to BACKLOG.md with mode=QUICK                        │
-│     ├─ Create .flow/items/ITEM-XXX/                             │
-│     └─ Set as active in ACTIVE.md                               │
-│                                                                 │
-│  2. ASSESS                                                      │
-│     ├─ Is task clear enough for quick mode?                     │
-│     ├─ Any obvious conflicts with existing work?                │
-│     └─ If unclear → suggest full workflow                       │
-│                                                                 │
-│  3. CLARIFY (if needed)                                         │
-│     ├─ Ask 1-2 critical questions only                          │
-│     └─ Record key decisions in item's STATE.md                  │
-│                                                                 │
-│  4. QUICK PLAN                                                  │
-│     ├─ Create 1-3 atomic tasks in item's PLAN.md                │
-│     ├─ Define verification steps                                │
-│     └─ No extensive requirements doc                            │
-│                                                                 │
-│  5. IMPLEMENT                                                   │
-│     ├─ Execute tasks                                            │
-│     ├─ Verify each task                                         │
-│     └─ Commit on success                                        │
-│                                                                 │
-│  6. QUICK VERIFY                                                │
-│     ├─ Run automated checks                                     │
-│     ├─ Brief confirmation with user                             │
-│     └─ Mark item COMPLETE in BACKLOG.md                         │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-## Starting Quick Mode
-
-### Create Work Item
-
-First, create a work item in the backlog:
-
-1. **Generate next item ID** (ITEM-XXX)
-2. **Create item directory**: `.flow/items/ITEM-XXX/`
-3. **Add to BACKLOG.md** with mode=QUICK
-4. **Set as active** in ACTIVE.md
-
-### Initialize Minimal State
-
-Create `.flow/items/ITEM-XXX/STATE.md` with minimal state:
-
-```markdown
-# Workflow State
-
-**Work Item**: ITEM-XXX
-**Title**: [task description]
-**Session Started**: [TIMESTAMP]
-**Mode**: QUICK
-
-## Current Phase
-
-**Phase**: QUICK
-**Task**: [task description]
-**Progress**: 0%
-
-## Quick Decisions
-
-[Any decisions made during clarification]
-
-## Tasks
-
-[Quick task list]
-```
-
-### Assess Task Suitability
-
-Check if task is suitable for quick mode:
+### Step 1: Task Assessment
 
 ```markdown
 **Quick Mode Assessment**
 
-Task: [task description]
+Task: "[description]"
 
-**Suitability check**:
-- [ ] Single, focused change
-- [ ] Clear requirements (no ambiguity)
-- [ ] Limited scope (1-5 files)
-- [ ] No complex dependencies
-- [ ] No stakeholder input needed
+Suitability:
+- [x] Single, focused change
+- [x] Clear requirements
+- [x] Limited scope (1-5 files)
+- [x] No complex dependencies
 
-**Assessment**: [SUITABLE / RECOMMEND_FULL_WORKFLOW]
+**Assessment**: SUITABLE for quick mode
 ```
 
 If not suitable:
 ```markdown
-**Task May Be Too Complex for Quick Mode**
+**Task May Be Too Complex**
 
-This task might benefit from full workflow because:
+This task might need full workflow:
 - [reason 1]
 - [reason 2]
 
-**Options**:
+Options:
 1. Continue with quick mode anyway
-2. Switch to full workflow: `/flow-workflow:flow [task]`
+2. Use full workflow: `/flow:start "[task]"`
 ```
 
-## Clarification (If Needed)
+### Step 2: Clarification (If Needed)
 
-Only ask questions that are critical:
+Only ask if critical ambiguity:
 
 ```javascript
 AskUserQuestion({
   questions: [{
     question: "Quick clarification: [specific question]?",
     header: "Clarify",
-    multiSelect: false,
     options: [
-      { label: "[Option A]", description: "[brief description]" },
-      { label: "[Option B]", description: "[brief description]" }
+      { label: "[Option A]", description: "[brief]" },
+      { label: "[Option B]", description: "[brief]" }
     ]
   }]
 })
 ```
 
-Record any decisions in item's STATE.md but skip full EXPLORATION.md.
+Skip if task is clear enough.
 
-## Quick Planning
+### Step 3: Direct Execution
 
-Create minimal `.flow/items/ITEM-XXX/PLAN.md`:
+Execute the task directly:
 
-```markdown
-# Quick Plan
+1. Read relevant files
+2. Make the changes
+3. Verify changes work
+4. Create commit
 
-**Work Item**: ITEM-XXX
-**Task**: [task description]
-**Created**: [TIMESTAMP]
-**Mode**: QUICK
+### Step 4: Verification
 
-## Tasks
-
-<task id="TASK-001" status="pending">
-  <name>[task name]</name>
-  <description>[brief description]</description>
-  <files>
-    <file action="[action]">[path]</file>
-  </files>
-  <actions>
-    <action>[action]</action>
-  </actions>
-  <verify>
-    <step>[verification]</step>
-  </verify>
-  <done>
-    <criterion>[done criterion]</criterion>
-  </done>
-  <commit>[commit message]</commit>
-</task>
-```
-
-## Implementation
-
-Execute tasks as in normal workflow:
-1. Mark task in_progress
-2. Execute actions
-3. Run verification
-4. Commit on success
-5. Mark completed
-
-## Quick Verification
-
-Run automated checks:
+Run minimal checks:
 
 ```bash
-# Build
+# Build check
 [build command]
 
-# Tests (relevant subset)
+# Test relevant area (if applicable)
 [test command]
-
-# Lint (changed files only)
-[lint command]
 ```
 
-Brief UAT:
+### Step 5: Commit
 
-```javascript
-AskUserQuestion({
-  questions: [{
-    question: "Does this change work as expected?",
-    header: "Quick UAT",
-    multiSelect: false,
-    options: [
-      { label: "Yes, looks good", description: "Change works correctly" },
-      { label: "No, needs adjustment", description: "Something isn't right" }
-    ]
-  }]
-})
-```
+```bash
+git add [changed files]
+git commit -m "[commit message]
 
-## Completion
-
-### Quick Complete
-
-```markdown
-**Quick Mode Complete**
-
-**Work Item**: ITEM-XXX - [task description]
-**Duration**: [time]
-**Commits**: [N]
-
-**Changes made**:
-- [summary of changes]
-
-**Verification**:
-- Build: PASS
-- Tests: PASS
-- User confirmation: YES
-
-All done!
-```
-
-### Update State Files
-
-Update `.flow/items/ITEM-XXX/STATE.md`:
-
-```markdown
-## Current Phase
-
-**Phase**: COMPLETE
-**Mode**: QUICK
-**Completed**: [TIMESTAMP]
-
-**Summary**:
-- Tasks: [N]
-- Commits: [N]
-- Duration: [time]
-```
-
-Update `.flow/BACKLOG.md`:
-- Mark ITEM-XXX as COMPLETE
-- Update status counts
-
-Update `.flow/ACTIVE.md`:
-- Clear active item or suggest next item
-
-## Escalation to Full Workflow
-
-If during quick mode you discover:
-- Task is more complex than expected
-- Requirements are unclear
-- Conflicts exist
-- Multiple stakeholders needed
-
-Escalate:
-
-```markdown
-**Escalating to Full Workflow**
-
-Quick mode revealed this task is more complex:
-- [reason]
-
-Transitioning to full workflow mode...
-
-State will be preserved and expanded.
+Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
 ```
 
 ## Output Format
 
-### Starting Quick Mode
+### Starting
 
 ```markdown
-**Quick Mode Started**
+**Quick Mode**
 
-**Work Item**: ITEM-XXX - [task description]
+Task: "[description]"
 
-**Plan**:
-1. [Task 1 brief]
-2. [Task 2 brief if any]
-
-Beginning implementation...
+Executing directly...
 ```
 
-### Progress
+### During Execution
 
 ```markdown
-**Quick Progress**: [X]/[Y] tasks
+**Quick Progress**
 
-**Work Item**: ITEM-XXX
-**Current**: [task name]
-**Status**: [status]
+- [x] Read [file]
+- [x] Made change
+- [ ] Verifying...
 ```
 
 ### Completion
@@ -333,28 +149,95 @@ Beginning implementation...
 ```markdown
 **Quick Mode Complete**
 
-**Work Item**: ITEM-XXX - [description]
-**Result**: [summary]
-**Duration**: [time]
+Task: "[description]"
 
-**Backlog updated**: Item marked COMPLETE
+**Changes**:
+- [file]: [what changed]
+
+**Verification**:
+- Build: ✓ PASS
+- Tests: ✓ PASS
+
+**Commit**: [hash] - [message]
+
+Done!
 ```
 
-## When to Switch to Full Workflow
+## No State Files
 
-Signs you should switch:
-- More than 3 clarifying questions needed
-- More than 5 tasks needed
-- Touching more than 10 files
-- Discovering unclear requirements
-- Finding conflicts
+Quick mode does **not** create:
+- `.flow/` directory
+- `FLOW.md`
+- `ITEM-XXX.md`
 
-Switching is always an option:
+The task is executed and completed without persisting workflow state.
+
+## Capability Routing
+
+Quick mode still uses capability discovery for complex tasks:
+
+1. If task appears to need TDD → Check for `tdd-implementation` capability
+2. If task is infrastructure → Check for `infrastructure` capability
+3. Route to discovered plugin or use built-in skills
+
+But routing is implicit, not announced verbosely.
+
+## Escalation
+
+If during execution you discover the task is more complex:
+
 ```markdown
-This is getting complex. Would you like to switch to full workflow mode?
+**Escalating to Full Workflow**
+
+Quick mode revealed complexity:
+- [reason]
+
+Creating work item and transitioning...
+
+Use `/flow:go` to continue with full workflow.
 ```
 
-## Skills Used
+This creates state files and transitions to regular workflow.
 
-- **atomic-tasks**: For task structure
-- **state-management**: For minimal state tracking
+## Signs to Escalate
+
+- More than 3 clarifying questions needed
+- More than 5 files affected
+- Discovering unclear requirements
+- Finding conflicts with other code
+- Needing stakeholder input
+
+## Comparison to Full Workflow
+
+| Aspect | Quick Mode | Full Workflow |
+|--------|------------|---------------|
+| State files | None | FLOW.md + ITEM-XXX.md |
+| Phases | None | DISCUSS → PLAN → EXECUTE → VERIFY |
+| Tracking | None | Full checkpoint/resume |
+| Suitable for | Small tasks | Complex features |
+| Time | Fast | Thorough |
+
+## Error Handling
+
+### Verification Failure
+
+```markdown
+**Quick Mode Failed**
+
+Verification error: [error]
+
+Options:
+1. Fix and retry
+2. Escalate to full workflow
+3. Abort
+```
+
+### Commit Failure
+
+```markdown
+**Commit Failed**
+
+Error: [pre-commit hook error]
+
+Fixing and retrying...
+```

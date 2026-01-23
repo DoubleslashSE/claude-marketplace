@@ -1,312 +1,291 @@
 # Flow Workflow Plugin
 
-A technology-agnostic workflow management plugin for Claude Code, providing structured phases (Discuss → Plan → Execute → Verify), explicit state management through markdown files, atomic task execution with fresh context, and built-in verification patterns.
+A **lightweight meta-orchestrator** for Claude Code that leverages your installed plugin ecosystem. Unlike monolithic workflow systems, flow-workflow delegates to specialized plugins when available and falls back to built-in defaults otherwise.
+
+## Key Differentiator
+
+**"The meta-workflow that makes your plugins work together."**
+
+Flow-workflow is technology-agnostic and plugin-aware. It discovers what plugins you have installed and routes work to the best-matched agent for each capability needed.
 
 ## Overview
 
-Flow Workflow helps you manage complex development tasks by breaking them into structured phases with explicit state tracking. It supports a **backlog of work items** (epics/stories) at different states, allowing you to plan multiple features upfront and implement them one at a time.
+Flow Workflow helps you manage complex development tasks through structured phases:
 
-Inspired by "Get Shit Done" (GSD) methodologies, it brings discipline to AI-assisted development.
+```
+DISCUSS → PLAN → EXECUTE → VERIFY → DONE
+```
 
-## Core Philosophy
-
-| Principle | Implementation |
-|-----------|----------------|
-| **Backlog-driven** | Multiple work items tracked at different states |
-| **Context is managed** | Fresh context per task, orchestrator stays under 40% |
-| **State is explicit** | Markdown files track everything |
-| **Tasks are atomic** | One task = one commit = one thing |
-| **Verification is built-in** | Every task has verify steps + UAT phase |
-| **Technology agnostic** | Works with any stack, integrates with tech-specific plugins |
+With just **5 commands** and **2 state files**, it provides:
+- Backlog management for multiple work items
+- Capability-based routing to installed plugins
+- Explicit state tracking with checkpoint/resume
+- Context budget awareness (stays under 40%)
 
 ## Quick Start
 
-### Initialize a Project
+### Start a Work Item
 
 ```
-/flow-workflow:init
+/flow:start "Add user authentication"
 ```
 
-Creates `.flow/` directory with backlog structure.
+This initializes the project (if needed), creates a work item, and begins the DISCUSS phase.
 
-### Create Work Items (Backlog)
-
-```
-/flow-workflow:new Add user authentication
-/flow-workflow:new Fix cart calculation bug --priority P0
-/flow-workflow:new Implement dark mode --priority P2
-```
-
-Creates work items in the backlog for later execution.
-
-### Run Full Workflow
+### Continue Working
 
 ```
-/flow-workflow:flow Add user authentication
+/flow:go
 ```
 
-Creates a work item and runs complete cycle: DISCUSS → PLAN → EXECUTE → VERIFY
+Smart continuation from current state - automatically routes to the right phase and agent.
 
-### Work with Backlog
-
-```
-/flow-workflow:backlog              # View all work items
-/flow-workflow:switch ITEM-002      # Switch to different item
-/flow-workflow:status               # See current status
-```
-
-### Quick Mode for Small Tasks
+### Quick Task (No State Files)
 
 ```
-/flow-workflow:quick Fix the login button alignment
+/flow:quick "Fix the typo in README"
 ```
 
-Lightweight path for simple, well-defined tasks.
+Direct execution for small, well-defined tasks.
 
-## Commands
-
-### Backlog Management
+## Commands (5 Total)
 
 | Command | Description |
 |---------|-------------|
-| `/flow-workflow:backlog` | List all work items and their status |
-| `/flow-workflow:new` | Create a new work item in the backlog |
-| `/flow-workflow:switch` | Switch to a different work item |
-| `/flow-workflow:status` | Display current state and backlog overview |
+| `/flow:start [name]` | Initialize, create item, or switch to existing |
+| `/flow:go` | Smart continuation from current state |
+| `/flow:status` | Show state, context budget, capabilities |
+| `/flow:backlog` | List and filter work items |
+| `/flow:quick "task"` | Direct execution without state |
 
-### Workflow Execution
+## State Files (2 Patterns)
 
-| Command | Description |
-|---------|-------------|
-| `/flow-workflow:init` | Initialize project with .flow/ backlog structure |
-| `/flow-workflow:discuss` | Explore requirements for active item |
-| `/flow-workflow:plan` | Create atomic task plan for active item |
-| `/flow-workflow:execute` | Execute tasks with fresh context |
-| `/flow-workflow:verify` | Run verification and UAT |
-| `/flow-workflow:flow` | Full workflow cycle (creates work item) |
-| `/flow-workflow:quick` | Lightweight path for small tasks |
-| `/flow-workflow:resume` | Resume from checkpoint |
+### FLOW.md (Project Level)
 
-## Workflow Phases
+```markdown
+# Flow Project State
 
-### DISCUSS Phase
+## Vision
+[Project vision]
 
-Explores requirements through adaptive questioning:
-- Maintains exploration map of discussed areas
-- Tracks explored vs. uncharted territory
-- Detects and resolves conflicts
-- Records decisions in STATE.md
+## Backlog
+| ID | Name | Status | Priority | Progress |
+|----|------|--------|----------|----------|
+| ITEM-001 | Auth | EXECUTE | P1 | 60% |
 
-### PLAN Phase
+## Active Item
+ITEM-001
 
-Creates atomic task plan:
-- Decomposes work into single-commit tasks
-- Defines verification steps for each task
-- Maps dependencies between tasks
-- Cross-verifies against requirements
+## Capabilities Cache
+[Discovered plugin mappings]
+```
 
-### EXECUTE Phase
+### ITEM-XXX.md (Per Work Item)
 
-Implements tasks with fresh context:
-- Routes to appropriate agents based on capabilities
-- Executes one task at a time
-- Creates atomic commits on success
-- Tracks progress in state files
+```markdown
+# ITEM-001: User Authentication
 
-### VERIFY Phase
+## Phase: EXECUTE (task 3/5)
 
-Validates implementation:
-- Runs automated checks (build, test, lint)
-- Verifies requirements traceability
-- Guides user acceptance testing
-- Collects sign-off
+## Decisions
+[Numbered decisions with rationale]
 
-## State Files
+## Requirements
+[Captured requirements]
 
-All state is stored in the `.flow/` directory:
+## Tasks
+[XML-structured atomic tasks]
 
-| File | Purpose |
-|------|---------|
-| `STATE.md` | Current phase, decisions, blockers, checkpoints |
-| `PROJECT.md` | Vision, scope, stakeholders |
-| `EXPLORATION.md` | Discussion progress and territory map |
-| `REQUIREMENTS.md` | Functional/non-functional requirements |
-| `PLAN.md` | XML-structured atomic tasks |
-| `ROADMAP.md` | Milestones and progress |
+## Checkpoint
+[Current state for resume]
+```
 
-## Capability Discovery
+## Capability-Based Routing
 
-The plugin dynamically discovers and uses other installed plugins:
+Flow-workflow discovers installed plugins and routes work based on capabilities:
 
-- Scans installed plugins at initialization
-- Maps plugin capabilities to abstract categories
-- Routes tasks to appropriate specialized agents
-- Falls back to internal agents when no match found
+| Capability | When Used | If No Plugin |
+|------------|-----------|--------------|
+| requirements-gathering | DISCUSS | defaults/interviewer |
+| brainstorming | DISCUSS | defaults/interviewer |
+| codebase-analysis | DISCUSS, PLAN | defaults/researcher |
+| tdd-implementation | EXECUTE | defaults/executor |
+| code-implementation | EXECUTE | defaults/executor |
+| infrastructure | EXECUTE | defaults/executor |
+| code-review | VERIFY | validator |
+| requirements-validation | VERIFY | validator |
 
-### Capability Categories
+### Delegation Announcement
 
-| Capability | Used For |
-|------------|----------|
-| requirements-gathering | Structured interviews |
-| codebase-analysis | Understanding existing code |
-| brainstorming | Exploring options |
-| tdd-implementation | Test-driven development |
-| code-implementation | General coding |
-| infrastructure | DevOps tasks |
-| code-review | Quality validation |
-| requirements-validation | Compliance checking |
+When routing, you'll see:
+
+```markdown
+**Delegating tdd-implementation** → dotnet-tdd:implementer
+Matched via keyword scoring (High confidence)
+```
+
+Or when using built-in:
+
+```markdown
+**Using built-in agent** for infrastructure → flow-workflow:defaults/executor
+No installed plugin matched this capability
+```
 
 ## Agents
 
 | Agent | Role |
 |-------|------|
-| `orchestrator` | Coordinates phases, spawns agents, maintains state |
-| `interviewer` | Adaptive questioning, exploration mapping |
-| `researcher` | Codebase investigation |
-| `planner` | Atomic task planning |
-| `executor` | Task implementation |
-| `verifier` | Validation and UAT |
+| `coordinator` | Core orchestration, phase transitions, capability routing |
+| `validator` | Built-in UAT + delegates code-review to plugins |
+| `defaults/interviewer` | Fallback for requirements/brainstorming |
+| `defaults/researcher` | Fallback for codebase analysis |
+| `defaults/executor` | Fallback for implementation |
+
+## Workflow Phases
+
+### DISCUSS Phase
+
+- Gathers requirements through adaptive questioning
+- Records decisions with rationale
+- Detects and resolves conflicts
+- Delegates to `requirements-gathering` capability (or defaults/interviewer)
+
+### PLAN Phase
+
+- Decomposes work into atomic, committable tasks
+- Handled by coordinator (built-in)
+- May use `codebase-analysis` for understanding existing code
+
+### EXECUTE Phase
+
+- Implements tasks one at a time
+- Routes based on task type:
+  - TDD tasks → `tdd-implementation` capability
+  - Infrastructure → `infrastructure` capability
+  - General code → `code-implementation` capability
+- Creates atomic commits on success
+
+### VERIFY Phase
+
+- Runs automated checks (build, test, lint)
+- Delegates code review to discovered plugin
+- Conducts user acceptance testing
+- Collects sign-off
+
+## Atomic Task Format
+
+Tasks in ITEM-XXX.md use XML:
+
+```xml
+<task id="TASK-001" status="pending">
+  <name>Implement user service</name>
+  <files>
+    <file action="create">src/services/UserService.ts</file>
+  </files>
+  <actions>
+    <action>Create UserService class</action>
+    <action>Add CRUD methods</action>
+  </actions>
+  <verify>
+    <step>npm test -- UserService</step>
+  </verify>
+  <commit>feat(user): add UserService with CRUD</commit>
+</task>
+```
+
+## Context Budget
+
+The coordinator monitors context usage:
+
+```markdown
+## Context Monitor
+- Current: 32%
+- Threshold: 50%
+- Fresh agents spawned: 3
+```
+
+When approaching 50%, it spawns fresh agents to continue with clean context.
 
 ## Skills
 
 | Skill | Purpose |
 |-------|---------|
-| `state-management` | State file operations and templates |
+| `state-management` | FLOW.md and ITEM-XXX.md operations |
+| `capability-discovery` | Plugin enumeration and routing |
 | `atomic-tasks` | Task structure and XML format |
-| `capability-discovery` | Plugin enumeration and mapping |
 | `exploration-tracking` | Discussion territory tracking |
-| `conflict-detection` | Conflict identification and resolution |
+| `conflict-detection` | Conflict identification |
 | `context-engineering` | Context window management |
 | `workflow-orchestration` | Phase coordination |
 
-## Atomic Task Format
+## Plugin Integration
 
-Tasks are defined in XML for clarity and parsing:
+Flow-workflow works with installed plugins:
 
-```xml
-<task id="TASK-001" status="pending">
-  <name>Implement user authentication service</name>
-  <description>Create core auth service with login/logout</description>
-  <files>
-    <file action="create">src/services/AuthService.ts</file>
-    <file action="modify">src/config/services.ts</file>
-  </files>
-  <actions>
-    <action>Create AuthService class with login/logout methods</action>
-    <action>Add dependency injection configuration</action>
-  </actions>
-  <verify>
-    <step>npm test -- AuthService</step>
-    <step>npm run build</step>
-  </verify>
-  <done>
-    <criterion>AuthService exists and is properly injected</criterion>
-    <criterion>Tests cover login success and failure</criterion>
-  </done>
-  <commit>feat(auth): add AuthService with login/logout</commit>
-</task>
-```
+| Plugin | Capabilities Provided |
+|--------|----------------------|
+| business-analyst | requirements-gathering, codebase-analysis |
+| dotnet-tdd | tdd-implementation, code-review |
+| node-tdd | tdd-implementation, code-review |
+| workshop-facilitator | brainstorming |
+| devops-azure-infrastructure | infrastructure |
 
-## Exploration Map
+If you don't have specialized plugins, built-in defaults handle all capabilities.
 
-During DISCUSS, progress is tracked visually:
+## Example Session
 
 ```
-[MAIN TOPIC]
-├── ✓ EXPLORED: Authentication
-│   ├── ✓ Login flow - Using OAuth, DECISION-003
-│   └── ◐ PARTIAL: Session management - JWT chosen, expiry TBD
-├── → CURRENT: Data storage
-│   └── ○ UNCHARTED: Caching strategy
-├── ○ UNCHARTED: API design
-└── ⊘ SKIPPED: Mobile support - Phase 2, per user
+> /flow:start "Add user registration"
+
+**Work Item Created**: ITEM-001
+**Phase**: DISCUSS
+
+**Delegating requirements-gathering** → business-analyst:stakeholder-interviewer
+Matched via keyword scoring
+
+[Interview begins...]
+
+> /flow:go
+
+**Phase Transition**: DISCUSS → PLAN
+Creating atomic tasks...
+
+> /flow:go
+
+**Continuing EXECUTE** (task 1/4)
+**Delegating tdd-implementation** → dotnet-tdd:implementer
+
+[Implementation continues...]
+
+> /flow:status
+
+**Active Item**: ITEM-001 - Add user registration
+**Phase**: EXECUTE (task 3/4)
+**Progress**: 75%
+
+**Context**: 28% (within budget)
+
+**Capabilities**:
+- tdd-implementation: dotnet-tdd:implementer (High)
+- code-review: dotnet-tdd:reviewer (High)
 ```
 
-### Status Indicators
+## Comparison
 
-- ✓ EXPLORED: Fully discussed, decisions made
-- ◐ PARTIAL: Started but incomplete
-- → CURRENT: Currently exploring
-- ○ UNCHARTED: Identified but not yet explored
-- ⊘ SKIPPED: User chose to skip (with reason)
-- ⚑ FLAGGED: Needs follow-up or has blockers
-
-## Conflict Detection
-
-The plugin automatically detects conflicts:
-- Contradictory requirements
-- Conflicting decisions
-- Technical incompatibilities
-- Scope vs. timeline issues
-
-Conflicts must be resolved before proceeding.
-
-## Resume Capability
-
-If workflow is interrupted:
-
-```
-/flow-workflow:resume
-```
-
-Reconstructs context from STATE.md and continues from last checkpoint.
-
-## Integration with Other Plugins
-
-Flow Workflow works with technology-specific plugins:
-
-- **dotnet-tdd**: Routes TDD implementation tasks
-- **business-analyst**: Uses for requirements gathering
-- **workshop-facilitator**: Leverages for brainstorming
-
-If no matching plugin is found, internal fallback agents are used.
+| Metric | Before | After |
+|--------|--------|-------|
+| Commands | 12 | 5 |
+| Agents | 6 | 3 + 3 defaults |
+| State files per item | 5+ | 1 |
+| Unique value | Capability discovery | **Plugin ecosystem orchestration** |
 
 ## Best Practices
 
-1. **Start with init**: Always initialize before starting work
-2. **Don't skip DISCUSS**: Even quick tasks benefit from clarity
-3. **Review the plan**: Approve tasks before execution starts
-4. **Commit atomically**: Each task should be one commit
-5. **Verify everything**: Don't skip the VERIFY phase
-6. **Use state files**: They're your external memory
-
-## Example Workflow
-
-```
-> /flow-workflow:init
-Initialized .flow/ with STATE.md and PROJECT.md
-Discovered 3 capability-matched plugins
-
-> /flow-workflow:flow Add user registration feature
-
-[DISCUSS Phase]
-Exploring: User registration requirements
-- What authentication method? → OAuth + email/password
-- What user data to collect? → Email, name, password
-- Email verification required? → Yes
-...
-
-[PLAN Phase]
-Creating atomic tasks:
-- TASK-001: Create User model
-- TASK-002: Add registration endpoint
-- TASK-003: Implement email verification
-- TASK-004: Add registration form
-...
-
-[EXECUTE Phase]
-Executing TASK-001... completed
-Executing TASK-002... completed
-Executing TASK-003... completed
-Executing TASK-004... completed
-
-[VERIFY Phase]
-Running automated checks... PASSED
-Verifying requirements... 4/4 met
-UAT: Please test registration flow... PASSED
-
-Workflow complete!
-```
+1. **Use `/flow:go`** - It figures out what to do next
+2. **Check `/flow:status`** - See context budget and capabilities
+3. **Install specialized plugins** - Better quality than defaults
+4. **Don't skip VERIFY** - Even for small changes
+5. **Review state files** - They're human-readable for a reason
 
 ## License
 
