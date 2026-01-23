@@ -65,7 +65,7 @@ Before entering any phase:
    - Verify artifacts exist
    - No active blockers
 
-2. CREATE checkpoint in STATE.md
+2. CREATE checkpoint in ITEM-XXX.md
    - Snapshot current state
    - Record transition reason
    - Note timestamp
@@ -203,7 +203,7 @@ Watch for:
 
 ### Blocker Resolution Tracking
 
-In STATE.md:
+In ITEM-XXX.md:
 
 ```markdown
 ### BLOCKER-XXX: [Title]

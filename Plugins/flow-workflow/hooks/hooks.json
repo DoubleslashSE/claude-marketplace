@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "If a .flow/ state file was modified, verify the change is consistent with current workflow phase and update STATE.md timestamps if needed."
+            "prompt": "If a .flow/ state file was modified, verify the change is consistent with the current item's phase in ITEM-XXX.md and update the checkpoint timestamp."
           }
         ]
       },
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Document user response in appropriate state file (EXPLORATION.md for DISCUSS phase, STATE.md for decisions). Update exploration map status indicators if applicable."
+            "prompt": "Document user response in the active item's ITEM-XXX.md file - add to Decisions section for choices, or Requirements section for gathered requirements."
           }
         ]
       }

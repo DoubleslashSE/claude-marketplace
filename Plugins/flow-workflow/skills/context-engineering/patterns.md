@@ -9,7 +9,7 @@
 ## Task Context for TASK-XXX
 
 **Task Definition**:
-[XML task from PLAN.md]
+[XML task from ITEM-XXX.md Tasks section]
 
 **Relevant Files**:
 - [file1]: [why needed]
@@ -212,7 +212,7 @@
 
 **What to Exclude**:
 - Full history of how we got here
-- All decisions (they're in STATE.md)
+- All decisions (they're in ITEM-XXX.md)
 - Completed work details
 
 ---
@@ -282,7 +282,7 @@
 ### The Memory Hoarder
 ```markdown
 BAD: Keeping full transcripts of all conversations
-GOOD: Summarize and reference STATE.md for history
+GOOD: Summarize and reference ITEM-XXX.md for history
 ```
 
 ### The File Dumper
@@ -306,5 +306,5 @@ GOOD: "Continuing TASK-005" (context established)
 ### The Inline Expander
 ```markdown
 BAD: "The task definition is: [full XML]..."
-GOOD: "Task TASK-005 (see PLAN.md lines 45-60)"
+GOOD: "Task TASK-005 (see ITEM-XXX.md Tasks section)"
 ```

@@ -51,7 +51,7 @@ A new decision contradicts an earlier decision.
 Proposed work conflicts with pending tasks.
 
 **Detection Point**: PLAN phase
-**Example**: "This change conflicts with TASK-003 in current PLAN.md"
+**Example**: "This change conflicts with TASK-003 in current ITEM-XXX.md"
 
 **Indicators**:
 - Same files modified differently
@@ -102,14 +102,14 @@ Chosen technology cannot support a requirement.
 │     └─ Priorities expressed                                     │
 │                                                                 │
 │  2. SCAN for contradictions                                     │
-│     ├─ Compare against STATE.md decisions                       │
-│     ├─ Compare against REQUIREMENTS.md items                    │
-│     ├─ Compare against existing PLAN.md tasks                   │
+│     ├─ Compare against ITEM-XXX.md decisions                    │
+│     ├─ Compare against ITEM-XXX.md requirements                 │
+│     ├─ Compare against existing tasks in ITEM-XXX.md            │
 │     └─ Check implicit assumptions                               │
 │                                                                 │
 │  3. IF CONFLICT DETECTED:                                       │
 │     ├─ STOP workflow immediately                                │
-│     ├─ Document conflict in STATE.md                            │
+│     ├─ Document conflict in ITEM-XXX.md                         │
 │     ├─ Present conflict clearly to user                         │
 │     └─ Wait for resolution before continuing                    │
 │                                                                 │
@@ -133,7 +133,7 @@ For each new assertion, check against:
 
 ## Conflict Documentation
 
-### In STATE.md
+### In ITEM-XXX.md
 
 ```markdown
 ## Conflicts
@@ -254,39 +254,39 @@ Resolution: Deferred
 
 ## Cross-Plan Verification
 
-Before creating PLAN.md tasks, verify:
+Before creating tasks, verify:
 
 ```markdown
 ## Cross-Plan Verification Checklist
 
-**Against REQUIREMENTS.md:**
+**Against ITEM-XXX.md requirements:**
 - [ ] All requirements have at least one task
 - [ ] No tasks contradict requirements
 - [ ] Priority order respected
 - [ ] No requirements orphaned
 
-**Against STATE.md decisions:**
+**Against ITEM-XXX.md decisions:**
 - [ ] Tasks align with recorded decisions
 - [ ] No tasks contradict decisions
 - [ ] Deferred items not accidentally included
 
-**Against existing PLAN.md (if exists):**
+**Against existing tasks in ITEM-XXX.md:**
 - [ ] New tasks don't conflict with pending tasks
 - [ ] File modifications don't overlap dangerously
 - [ ] Dependency order preserved
 - [ ] No circular dependencies created
 
-**Against ROADMAP.md:**
-- [ ] Tasks fit within milestone scope
+**Against FLOW.md backlog:**
+- [ ] Tasks fit within item scope
 - [ ] No scope creep detected
-- [ ] Timeline feasible
+- [ ] Dependencies on other items documented
 
 **Conflicts found**: [List or "None"]
 ```
 
 ## Integration Points
 
-- **State Management**: Document conflicts in STATE.md
+- **State Management**: Document conflicts in ITEM-XXX.md
 - **Exploration Tracking**: Flag areas with detected conflicts
 - **Interviewer Agent**: Stop and present conflicts during discussion
 - **Planner Agent**: Verify cross-plan consistency

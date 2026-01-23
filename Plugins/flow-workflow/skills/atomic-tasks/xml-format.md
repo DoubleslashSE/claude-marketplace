@@ -291,7 +291,7 @@ Conventional commit message for this task. Format:
 
 ## Parsing Tasks
 
-### Extract Tasks from PLAN.md
+### Extract Tasks from ITEM-XXX.md
 ```javascript
 // Regex pattern to extract tasks
 const taskPattern = /<task[^>]*>([\s\S]*?)<\/task>/g;

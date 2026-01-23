@@ -44,8 +44,8 @@ BEST: Read summaries, then specific sections
 ### Hierarchical Loading
 
 Load context in layers:
-1. **L1 Summary**: High-level overview (PROJECT.md)
-2. **L2 Details**: Phase-specific files (REQUIREMENTS.md for PLAN)
+1. **L1 Summary**: High-level overview (FLOW.md)
+2. **L2 Details**: Item-specific state (ITEM-XXX.md)
 3. **L3 Specifics**: Task-specific files (only files in current task)
 
 ### Incremental Loading
@@ -76,7 +76,7 @@ When spawning fresh agent:
 ```markdown
 Include in handoff:
 - Task ID and definition
-- Key decisions from STATE.md
+- Key decisions from ITEM-XXX.md
 - Relevant file paths
 - Success criteria
 
@@ -117,10 +117,10 @@ Periodically verify:
 Use state files as external memory:
 
 ### What to Store in Files
-- All decisions (STATE.md)
-- Exploration progress (EXPLORATION.md)
-- Task definitions (PLAN.md)
-- Requirements (REQUIREMENTS.md)
+- All decisions (ITEM-XXX.md Decisions section)
+- Exploration progress (ITEM-XXX.md Exploration section)
+- Task definitions (ITEM-XXX.md Tasks section)
+- Requirements (ITEM-XXX.md Requirements section)
 
 ### What to Keep in Context
 - Current phase and task
@@ -179,7 +179,7 @@ After compression:
 
 ```markdown
 BAD: Include full task XML in every message
-GOOD: "Executing TASK-005 (see PLAN.md for details)"
+GOOD: "Executing TASK-005 (see ITEM-XXX.md Tasks section)"
 ```
 
 ### Checkpoint Snapshots
@@ -199,7 +199,7 @@ At checkpoints, snapshot key state:
 ## Integration with Workflow
 
 ### During DISCUSS
-- Keep exploration map in EXPLORATION.md
+- Keep exploration map in ITEM-XXX.md
 - Summarize findings per area
 - Reference decisions by ID
 
@@ -216,7 +216,7 @@ At checkpoints, snapshot key state:
 ### During VERIFY
 - Load summary of completed work
 - Cross-reference requirements by ID
-- Keep verification results in STATE.md
+- Keep verification results in ITEM-XXX.md
 
 ## Best Practices
 

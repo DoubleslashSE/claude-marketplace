@@ -37,9 +37,7 @@ Transfer control between phases (DISCUSS → PLAN, PLAN → EXECUTE, etc.)
 - 8 functional requirements identified
 
 **Artifacts for PLAN**:
-- REQUIREMENTS.md: 8 FR, 3 NFR documented
-- EXPLORATION.md: Full exploration map
-- STATE.md: Decisions recorded
+- ITEM-XXX.md: 8 FR, 3 NFR documented, full exploration map, decisions recorded
 
 **Key context**:
 - Auth must use OAuth (DECISION-004)
@@ -61,7 +59,7 @@ Transfer a specific task to an executor agent
 ## Task Handoff: TASK-XXX
 
 **Task definition**:
-[XML task from PLAN.md]
+[XML task from ITEM-XXX.md Tasks section]
 
 **Context**:
 - Preceding tasks: [completed tasks that affect this one]
@@ -322,7 +320,7 @@ Always structure handoffs with:
 **Topic**: [topic explored]
 **Coverage**: [X]%
 
-**Exploration map**: [summary or reference to EXPLORATION.md]
+**Exploration map**: [summary or reference to ITEM-XXX.md exploration section]
 
 **Decisions captured**:
 - DECISION-XXX: [summary]

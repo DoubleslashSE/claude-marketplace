@@ -61,7 +61,7 @@ This skill provides techniques for maintaining awareness of explored vs. unchart
 ### Initialize Map
 
 ```markdown
-1. Create EXPLORATION.md
+1. Add Exploration Map section to ITEM-XXX.md
 2. Set topic from user's initial request
 3. Identify initial L1 areas from topic
 4. Mark all as UNCHARTED
@@ -208,7 +208,7 @@ Flagged areas:
 
 ## Integration Points
 
-- **State Management**: Store exploration map in EXPLORATION.md
+- **State Management**: Store exploration map in ITEM-XXX.md
 - **Conflict Detection**: Flag conflicting areas
 - **Interviewer Agent**: Uses map to guide questioning
 - **Workflow Orchestration**: Phase transition based on coverage
