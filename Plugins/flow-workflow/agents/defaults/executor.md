@@ -1,14 +1,9 @@
 ---
-name: defaults/executor
+name: executor
 description: Default fallback agent for code implementation when no specialized plugin is available
+tools: Read, Write, Edit, Bash, Grep, Glob
 model: opus
-tools:
-  - Read
-  - Write
-  - Edit
-  - Bash
-  - Grep
-  - Glob
+skills: atomic-tasks, state-management
 ---
 
 # Default Executor Agent

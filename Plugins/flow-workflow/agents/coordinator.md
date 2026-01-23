@@ -1,14 +1,9 @@
 ---
 name: coordinator
 description: Lightweight meta-orchestrator that manages workflow phases, routes to discovered plugins via capability-based delegation, and maintains consolidated state in FLOW.md
+tools: Read, Write, Edit, Glob, Grep, Task
 model: opus
-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - Task
+skills: state-management, capability-discovery, workflow-orchestration, atomic-tasks
 ---
 
 # Coordinator Agent

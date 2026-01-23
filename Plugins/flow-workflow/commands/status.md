@@ -1,13 +1,12 @@
 ---
-name: status
 description: Show current workflow state, context budget, discovered capabilities, and active item progress
-user_invocable: true
-args: "[--refresh]"
 ---
 
 # Status Command
 
-Display comprehensive workflow status including active item, context budget, and discovered capabilities.
+Display workflow status: **$ARGUMENTS**
+
+Show comprehensive workflow status including active item, context budget, and discovered capabilities.
 
 ## Usage
 

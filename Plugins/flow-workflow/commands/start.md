@@ -1,11 +1,10 @@
 ---
-name: start
 description: Initialize project, create new work item, or switch to existing item - all in one command
-user_invocable: true
-args: "[item-name] [--priority P0|P1|P2|P3]"
 ---
 
 # Start Command
+
+Initialize, create, or switch work items: **$ARGUMENTS**
 
 This command handles initialization, work item creation, and item switching in one unified interface.
 

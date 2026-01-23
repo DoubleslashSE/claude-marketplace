@@ -1,11 +1,10 @@
 ---
-name: quick
 description: Direct task execution without state files - for small, well-defined tasks that don't need workflow tracking
-user_invocable: true
-args: "<task description>"
 ---
 
 # Quick Command
+
+Execute task directly: **$ARGUMENTS**
 
 Execute a small, well-defined task directly without creating state files. This is the lightweight path for tasks that don't need full workflow tracking.
 

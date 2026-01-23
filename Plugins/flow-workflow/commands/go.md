@@ -1,10 +1,10 @@
 ---
-name: go
 description: Smart continuation - automatically resumes from current state, transitions phases, and routes to appropriate agents
-user_invocable: true
 ---
 
 # Go Command
+
+Continue workflow execution from current state.
 
 This is the primary command for continuing workflow execution. It reads current state and intelligently determines the next action.
 

@@ -1,14 +1,9 @@
 ---
-name: defaults/interviewer
+name: interviewer
 description: Default fallback agent for requirements gathering and brainstorming when no specialized plugin is available
+tools: Read, Write, Edit, Glob, Grep, AskUserQuestion
 model: opus
-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - AskUserQuestion
+skills: exploration-tracking, conflict-detection, state-management
 ---
 
 # Default Interviewer Agent

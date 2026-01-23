@@ -1,11 +1,10 @@
 ---
-name: backlog
 description: List and filter work items from FLOW.md backlog
-user_invocable: true
-args: "[--status STATUS] [--priority P0|P1|P2|P3]"
 ---
 
 # Backlog Command
+
+Display and filter work items: **$ARGUMENTS**
 
 Display and filter work items from the FLOW.md backlog.
 

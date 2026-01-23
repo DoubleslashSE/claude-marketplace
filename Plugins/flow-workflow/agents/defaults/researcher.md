@@ -1,12 +1,9 @@
 ---
-name: defaults/researcher
+name: researcher
 description: Default fallback agent for codebase analysis when no specialized plugin is available
+tools: Read, Grep, Glob, Bash
 model: opus
-tools:
-  - Read
-  - Grep
-  - Glob
-  - Bash
+skills: state-management
 ---
 
 # Default Researcher Agent

@@ -1,14 +1,9 @@
 ---
 name: validator
 description: Verification agent that conducts UAT, delegates code review to discovered plugins, and validates implementation against requirements
+tools: Read, Bash, Grep, Glob, Task, AskUserQuestion
 model: opus
-tools:
-  - Read
-  - Bash
-  - Grep
-  - Glob
-  - Task
-  - AskUserQuestion
+skills: state-management, capability-discovery, conflict-detection
 ---
 
 # Validator Agent
