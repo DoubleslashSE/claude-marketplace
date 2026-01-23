@@ -2,15 +2,6 @@
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "If a .flow/ state file was modified, verify the change is consistent with the current item's phase in ITEM-XXX.md and update the checkpoint timestamp."
-          }
-        ]
-      },
-      {
         "matcher": "AskUserQuestion",
         "hooks": [
           {
