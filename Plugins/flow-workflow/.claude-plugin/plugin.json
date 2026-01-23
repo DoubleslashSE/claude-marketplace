@@ -1,7 +1,7 @@
 {
   "name": "flow-workflow",
   "description": "Lightweight meta-orchestrator that leverages your plugin ecosystem through capability-based routing, with simplified commands (5), consolidated state files (2), and smart continuation",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "author": {
     "name": "DoubleslashSE",
     "email": "info@doubleslash.se"
