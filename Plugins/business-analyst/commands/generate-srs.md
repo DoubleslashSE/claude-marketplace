@@ -10,6 +10,26 @@ Generate Software Requirements Specification for: **$ARGUMENTS**
 
 This command compiles all gathered requirements, analysis findings, and stakeholder information into a formal IEEE 830 compliant Software Requirements Specification document.
 
+## Input Sources
+
+### From Saved Project (preferred)
+If a `.business-analyst/` directory exists, the SRS is generated from all persisted state:
+- `requirements/functional.md` → Section 3.2
+- `requirements/non-functional.md` → Section 3.3
+- `requirements/constraints.md` → Section 2.4, 3.4
+- `requirements/assumptions.md` → Section 2.5
+- `requirements/use-cases.md` → Section 3.2 (detailed flows)
+- `stakeholders.md` → Section 2.3
+- `risk-register.md` → Appendix D
+- `data-dictionary.md` → Appendix E
+- `traceability.md` → Appendix C
+- `project.json` → Document metadata, version, counters
+
+This means you can gather requirements over days or weeks using `/add`, `/review`, `/resume`, etc., then run `/generate-srs` at any point to produce the full document from everything accumulated so far.
+
+### From Conversation Context
+If no `.business-analyst/` project exists, the SRS is compiled from whatever requirements have been gathered in the current conversation.
+
 ## Prerequisites
 
 Before generating the SRS, ensure you have:
