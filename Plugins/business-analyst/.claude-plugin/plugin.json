@@ -1,9 +1,20 @@
 {
   "name": "business-analyst",
   "description": "Senior Business Analyst plugin for requirements gathering, codebase analysis, stakeholder interviews, and SRS document generation",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "author": {
     "name": "DoubleslashSE",
     "email": "info@doubleslash.se"
-  }
+  },
+  "license": "MIT",
+  "repository": "https://github.com/DoubleslashSE/claude-marketplace",
+  "keywords": [
+    "business-analysis",
+    "requirements",
+    "srs",
+    "ieee-830",
+    "specification",
+    "stakeholder-interviews",
+    "codebase-analysis"
+  ]
 }

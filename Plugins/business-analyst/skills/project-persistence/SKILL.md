@@ -245,3 +245,100 @@ Track all TBD items across the project:
 2. When resuming: present outstanding TBD items
 3. When a TBD is resolved: remove from list, update changelog
 4. Validation reports flag remaining TBDs
+
+## Timestamps
+
+Claude does not have reliable access to wall-clock time. For timestamps:
+
+1. **Use the date from system context** if available (e.g., `currentDate` from system reminders)
+2. **Ask the user** if the date is important for audit: "What date should I record for this session?"
+3. **Use date-only format** (`YYYY-MM-DD`) rather than precise timestamps — precision that can't be verified is misleading
+4. **Never fabricate times** — if unsure, use the date only or mark as "Date unknown"
+
+All `project.json` date fields and changelog entries should follow this approach.
+
+## Error Handling and Recovery
+
+### Project Directory Validation
+
+On every load, validate the `.business-analyst/` directory:
+
+```
+1. Check project.json exists and is valid JSON
+2. Check requirements/ directory exists
+3. Check each expected file exists
+4. If ANY check fails → report what's broken and offer repair
+```
+
+**Recovery actions by failure type:**
+
+| Failure | Recovery |
+|---------|----------|
+| `project.json` missing | Rebuild from requirement files (scan for IDs and count) |
+| `project.json` invalid JSON | Inform user, offer to reinitialize from files |
+| `requirements/` dir missing | Create it, warn that previous requirements are lost |
+| Individual requirement file missing | Create empty file, warn user, adjust counters |
+| Counter mismatch (counter says 12, file has 10) | **Re-scan the file**, update counter to match actual content |
+
+### Counter Integrity
+
+**Always re-derive counters from files on load**, not from `project.json` alone:
+
+1. On `/resume`, `/add`, `/status`: scan requirement files for highest ID
+2. If file-derived count != `project.json` count: update `project.json` silently
+3. Log the discrepancy in changelog: "Counter corrected: FR counter was {old}, actual is {new}"
+
+This handles manual edits, interrupted saves, and any other desync.
+
+### Save Order
+
+When saving state, always follow this order to minimize corruption risk:
+
+```
+1. Write requirement files FIRST (the actual data)
+2. Write changelog.md (the audit trail)
+3. Write project.json LAST (the index)
+```
+
+Rationale: if the save is interrupted after step 1, the data is preserved. On next load, counter re-derivation (above) will fix the index.
+
+### Manual Edit Detection
+
+On load, compare `project.json.lastModified` against actual file modification. If files are newer than `project.json`, inform the user:
+
+> "Some project files appear to have been modified outside the plugin. I'll re-scan to pick up any changes."
+
+Then re-derive counters and rebuild index.
+
+## Large Project Handling
+
+### Scaling Guidance
+
+For projects with many requirements (100+):
+
+**Reading**: Do NOT load all requirement files at once. Instead:
+1. Read `project.json` for counts and metadata (small file)
+2. Only read specific requirement files when needed for the current operation
+3. For `/status`: read files to scan for conflicts, but summarize — don't display all 500 requirements
+
+**Duplicate Detection** (`/add`): For large projects (200+ requirements):
+1. Read existing requirement IDs and titles only (not full descriptions)
+2. Compare new requirements against titles first (fast)
+3. Only do deep comparison if a title is similar
+
+**SRS Generation**: For projects with 200+ requirements:
+1. Generate the SRS in sections, not all at once
+2. Write each section to the output file incrementally
+3. Use the Write tool to append rather than building the entire document in memory
+
+**Status Display**: For large projects:
+1. Show summary counts (already designed this way)
+2. Only show top 10 conflicts, top 10 gaps — not all
+3. Offer: "Found {N} issues. Show all, or just critical?"
+
+### Context Window Awareness
+
+If a requirement file exceeds 1500 lines:
+1. Read in chunks using offset/limit parameters
+2. Process each chunk independently
+3. Never attempt to load the entire file into a single prompt

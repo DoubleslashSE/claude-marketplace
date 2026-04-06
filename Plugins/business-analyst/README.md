@@ -70,6 +70,7 @@ claude --plugin-dir ./Plugins/business-analyst
 | `/business-analyst:brownfield {path}` | Existing codebase analysis |
 | `/business-analyst:generate-srs` | Generate IEEE 830 SRS document |
 | `/business-analyst:validate {artifact}` | Validate work quality and completeness |
+| `/business-analyst:remove {ID}` | Remove, deprecate, or revert requirements with audit trail |
 
 ## Agents
 
@@ -345,7 +346,8 @@ business-analyst/
 │   ├── greenfield.md
 │   ├── brownfield.md
 │   ├── generate-srs.md
-│   └── validate.md
+│   ├── validate.md
+│   └── remove.md
 ├── skills/
 │   ├── requirements-elicitation/
 │   │   ├── SKILL.md
@@ -380,6 +382,24 @@ business-analyst/
 - **P**erformance: Response time, throughput, resource usage
 - **S**upportability: Maintainability, configurability, testability
 - **+**: Constraints (design, implementation, interface, physical)
+
+## Production Notes
+
+### Data Safety
+- SRS documents are versioned (`SRS-v1.0.md`, `SRS-v2.0.md`) — previous versions are never overwritten
+- Requirement IDs are never reused after deletion (audit trail integrity)
+- Counter integrity is re-derived from files on every load, not trusted from `project.json` alone
+- Save order is data-first, index-last to minimize corruption from interrupted saves
+
+### Timestamps
+Claude does not have reliable wall-clock access. The plugin uses date-only format (`YYYY-MM-DD`) from system context when available, and asks the user when precision matters.
+
+### Large Projects
+For projects with 200+ requirements, the plugin reads files selectively (not all at once) and summarizes rather than displaying all items. See the project-persistence skill for chunking details.
+
+### Limitations
+- **Single-user**: No file locking or concurrent access protection. One person should work on a project at a time.
+- **Context window**: Very large requirement files (1500+ lines) are read in chunks. Some operations may require multiple passes.
 
 ## License
 

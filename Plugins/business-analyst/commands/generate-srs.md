@@ -118,7 +118,21 @@ Create mappings:
 
 ### Step 5: Output Generation
 
-Produce the final document in markdown format.
+#### Output Location
+- **With saved project**: Write to `.business-analyst/srs/SRS-v{VERSION}.md`
+  - Version is auto-incremented: `SRS-v1.0.md`, `SRS-v2.0.md`, etc.
+  - Track the current SRS version in `project.json`
+- **Without saved project**: Write to `./SRS-{ProjectName}.md` in the current directory
+
+#### Overwrite Protection
+**Never silently overwrite a previous SRS version.** Instead:
+1. Check if a previous SRS exists in `.business-analyst/srs/`
+2. If yes, inform the user:
+   > "A previous SRS exists (SRS-v{N}.md, generated on {date}). I'll generate a new version: SRS-v{N+1}.md. The previous version is preserved."
+3. Create the new version alongside the old one
+4. Update `project.json` with the new SRS version number
+
+Previous versions are never deleted — they form the document history.
 
 ## Output Options
 
