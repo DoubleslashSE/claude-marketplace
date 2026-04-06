@@ -6,28 +6,33 @@ A collection of plugins for [Claude Code](https://claude.com/claude-code) that e
 
 | Plugin | Description | Version |
 |--------|-------------|---------|
-| [dotnet-tdd](./plugins/dotnet-tdd) | Test-Driven Development for .NET with SOLID, DRY, KISS, YAGNI, and CQS principles | 1.0.0 |
+| [business-analyst](./Plugins/business-analyst) | Senior Business Analyst for requirements gathering, codebase analysis, stakeholder interviews, and SRS document generation | 1.1.0 |
+| [dotnet-developer](./Plugins/dotnet-developer) | General .NET development workflow with automated validation through build, test, and static analysis quality gates | 1.0.0 |
+| [dotnet-tdd](./Plugins/dotnet-tdd) | Test-Driven Development for .NET following TDD, SOLID, DRY, KISS, YAGNI, and CQS principles | 1.2.2 |
+| [flow-workflow](./Plugins/flow-workflow) | Lightweight meta-orchestrator that leverages your plugin ecosystem through capability-based routing | 2.0.4 |
+| [infra](./Plugins/infra) | Infrastructure troubleshooting for diagnosing and resolving issues across GitHub Actions, Railway, Supabase, and Postgres | 1.0.0 |
+| [node-tdd](./Plugins/node-tdd) | Node.js Test-Driven Development with TypeScript support, SOLID principles, clean code practices, and functional patterns | 1.1.1 |
+| [workshop-facilitator](./Plugins/workshop-facilitator) | Workshop facilitation for design thinking, brainstorming, and collaborative problem-solving sessions | 1.0.1 |
 
 ## Installation
 
 Install a plugin by pointing Claude Code to the plugin directory:
 
 ```bash
-claude --plugin-dir ./plugins/dotnet-tdd
+claude --plugin-dir ./Plugins/dotnet-tdd
 ```
 
 ## Repository Structure
 
 ```
-plugins/
+Plugins/
+├── business-analyst/        # Requirements & SRS generation
+├── dotnet-developer/        # .NET development workflow
 ├── dotnet-tdd/              # .NET TDD plugin
-│   ├── .claude-plugin/
-│   │   └── plugin.json      # Plugin manifest
-│   ├── agents/              # Specialized agents
-│   ├── commands/            # Slash commands
-│   ├── hooks/               # Event hooks
-│   ├── skills/              # Domain knowledge
-│   └── README.md
+├── flow-workflow/           # Meta-orchestrator for plugin routing
+├── infra/                   # Infrastructure troubleshooting
+├── node-tdd/                # Node.js TDD plugin
+├── workshop-facilitator/    # Workshop facilitation
 └── [future-plugins]/
 ```
 
@@ -53,7 +58,7 @@ plugin-name/
   "name": "plugin-name",
   "version": "1.0.0",
   "description": "What the plugin does",
-  "keywords": ["relevant", "tags"],
+  "author": "Your Name <email>",
   "commands": ["./commands/command.md"],
   "agents": ["./agents/agent.md"],
   "skills": ["./skills/skill-name"],
@@ -63,7 +68,7 @@ plugin-name/
 
 ## Contributing
 
-Want to add a plugin? Submit a PR with your plugin in the `plugins/` directory following the structure above.
+Want to add a plugin? Submit a PR with your plugin in the `Plugins/` directory following the structure above.
 
 ## License
 
