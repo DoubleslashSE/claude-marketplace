@@ -243,6 +243,7 @@ At the end of this workflow, you will have:
 ## Commands for Detailed Work
 
 If you need more focused analysis, use these commands:
+- `/business-analyst:review` - Review an existing requirements document and improve it
 - `/business-analyst:greenfield` - Dedicated greenfield workflow
 - `/business-analyst:brownfield` - Dedicated brownfield workflow
 - `/business-analyst:interview` - Focused interview session

@@ -39,6 +39,7 @@ claude --plugin-dir ./Plugins/business-analyst
 | Command | Description |
 |---------|-------------|
 | `/business-analyst:analyze {context}` | Full analysis workflow (auto-detects greenfield/brownfield) |
+| `/business-analyst:review {file}` | Review existing requirements doc, fill gaps via Q&A, generate SRS |
 | `/business-analyst:interview {topic}` | Interactive requirements gathering session |
 | `/business-analyst:greenfield {project}` | New project requirements analysis |
 | `/business-analyst:brownfield {path}` | Existing codebase analysis |
@@ -235,6 +236,18 @@ All analysis commands accept an **objective** that explains WHY you're doing the
 /business-analyst:analyze ./legacy "modernize to REST standards"
 ```
 
+### Review Existing Requirements
+```bash
+# Review a requirements file, fill gaps, generate complete SRS
+/business-analyst:review ./docs/requirements.md
+
+# Review multiple files
+/business-analyst:review ./docs/functional-reqs.md ./docs/nfr.md
+
+# Review with objective
+/business-analyst:review ./requirements.md --objective "Preparing for sprint planning"
+```
+
 ### Start Full Analysis
 ```bash
 # Auto-detect project type and run complete analysis
@@ -292,6 +305,7 @@ business-analyst/
 │   └── validator.md
 ├── commands/
 │   ├── analyze.md
+│   ├── review.md
 │   ├── interview.md
 │   ├── greenfield.md
 │   ├── brownfield.md
