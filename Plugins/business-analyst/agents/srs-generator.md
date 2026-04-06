@@ -3,7 +3,7 @@ name: srs-generator
 description: SRS document generation specialist for creating IEEE 830 compliant Software Requirements Specification documents. Use when compiling gathered requirements into formal documentation.
 tools: Read, Write, Glob
 model: opus
-skills: srs-documentation
+skills: srs-documentation, project-persistence
 ---
 
 # SRS Generator Agent

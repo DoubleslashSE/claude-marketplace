@@ -6,7 +6,16 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Document stakeholder response and track confirmed vs unconfirmed items."
+            "prompt": "Document stakeholder response and track confirmed vs unconfirmed items. If a .business-analyst/ project directory exists, save any new or updated requirements to the appropriate files and update the changelog."
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "If a .business-analyst/ project directory exists and this write modified a requirements file, update project.json counters to reflect the current state."
           }
         ]
       }

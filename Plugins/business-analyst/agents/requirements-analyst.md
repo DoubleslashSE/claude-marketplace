@@ -3,7 +3,7 @@ name: requirements-analyst
 description: Senior Business Analyst for requirements gathering, classification, and prioritization. Use when conducting requirements analysis, stakeholder management, or creating requirements documentation.
 tools: Read, Grep, Glob, Write, Edit, AskUserQuestion
 model: opus
-skills: requirements-elicitation, srs-documentation
+skills: requirements-elicitation, srs-documentation, project-persistence
 ---
 
 # Requirements Analyst Agent

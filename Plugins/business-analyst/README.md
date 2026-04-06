@@ -14,6 +14,28 @@ A comprehensive Senior Business Analyst plugin that helps gather requirements, a
 - **RACI & Conflict Resolution**: Stakeholder decision authority matrix with conflict resolution protocol
 - **Dual Context Support**: Greenfield and brownfield workflows
 
+## Multi-Session Support
+
+The plugin saves all work to a `.business-analyst/` directory in your project, so you can build your specification incrementally over days or weeks:
+
+```bash
+# Day 1: Start with existing requirements
+/business-analyst:review ./docs/requirements.md
+
+# Day 2: Resume and add security requirements
+/business-analyst:resume
+/business-analyst:add security requirements
+
+# Day 3: Add requirements from a new meeting
+/business-analyst:add ./meeting-notes.md
+
+# Day 4: Check progress and generate SRS
+/business-analyst:status
+/business-analyst:generate-srs
+```
+
+All sessions are logged, TBD items are tracked, and the plugin picks up exactly where you left off.
+
 ## Objective-Driven Workflow
 
 Providing an objective upfront (e.g., "refactoring for testability" or "security audit") enables the plugin to:
@@ -40,6 +62,9 @@ claude --plugin-dir ./Plugins/business-analyst
 |---------|-------------|
 | `/business-analyst:analyze {context}` | Full analysis workflow (auto-detects greenfield/brownfield) |
 | `/business-analyst:review {file}` | Review existing requirements doc, fill gaps via Q&A, generate SRS |
+| `/business-analyst:add {file or topic}` | Add new requirements to an existing project (from file, inline, or interview) |
+| `/business-analyst:resume` | Resume a project from saved state, continue where you left off |
+| `/business-analyst:status` | Show current project progress, counts, validation scores, and TBDs |
 | `/business-analyst:interview {topic}` | Interactive requirements gathering session |
 | `/business-analyst:greenfield {project}` | New project requirements analysis |
 | `/business-analyst:brownfield {path}` | Existing codebase analysis |
@@ -83,6 +108,13 @@ SRS writing guidance including:
 - Risk register templates and guidance
 - Data dictionary templates
 - Acceptance test strategy framework
+
+### project-persistence
+Multi-session project state management:
+- Saves all requirements to `.business-analyst/` directory
+- Tracks session history, TBD items, and changelogs
+- Counter-based ID management across sessions
+- Duplicate detection when adding new requirements
 
 ### technical-analysis
 Technical analysis capabilities:
@@ -306,6 +338,9 @@ business-analyst/
 ├── commands/
 │   ├── analyze.md
 │   ├── review.md
+│   ├── add.md
+│   ├── resume.md
+│   ├── status.md
 │   ├── interview.md
 │   ├── greenfield.md
 │   ├── brownfield.md
@@ -327,9 +362,11 @@ business-analyst/
 │   │   ├── risk-register.md
 │   │   ├── data-dictionary.md
 │   │   └── acceptance-test-strategy.md
-│   └── technical-analysis/
-│       ├── SKILL.md
-│       └── integration-patterns.md
+│   ├── technical-analysis/
+│   │   ├── SKILL.md
+│   │   └── integration-patterns.md
+│   └── project-persistence/
+│       └── SKILL.md
 ├── hooks/
 │   └── hooks.json
 └── README.md

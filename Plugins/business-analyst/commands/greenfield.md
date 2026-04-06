@@ -205,6 +205,16 @@ I will pause for your confirmation at:
 9. **Validation Report**
    - Quality and completeness assessment
 
+## Project Persistence
+
+**All work is automatically saved** to a `.business-analyst/` directory.
+
+- At start: initialize or load existing `.business-analyst/` project
+- During: save requirements incrementally as they are gathered
+- At end: save all state, update changelog, inform user about `/business-analyst:resume`
+
+See the project-persistence skill for full details.
+
 ## Getting Started
 
 Let's begin the greenfield analysis!

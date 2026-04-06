@@ -250,6 +250,26 @@ If you need more focused analysis, use these commands:
 - `/business-analyst:generate-srs` - SRS generation only
 - `/business-analyst:validate` - Validation only
 
+## Project Persistence
+
+**All work is automatically saved** to a `.business-analyst/` directory in the project root.
+
+### At the Start
+1. Check if `.business-analyst/` already exists
+   - If yes: load existing state and offer to continue or start fresh
+   - If no: create the project directory structure and `project.json`
+
+### During the Workflow
+- Save requirements to `.business-analyst/requirements/` files as they are gathered
+- Update `project.json` counters after each phase
+- Log interview Q&A to `interview-log.md`
+
+### At the End
+1. Save all final requirements, risk register, data dictionary, and traceability
+2. Update `project.json` with session summary and validation scores
+3. Append session summary to `changelog.md`
+4. Inform user: "Progress saved. Run `/business-analyst:resume` to continue, `/business-analyst:add` to add more, or `/business-analyst:status` to check progress."
+
 ## Getting Started
 
 **If an objective was provided in the arguments**, acknowledge it:

@@ -219,6 +219,16 @@ Generate the complete SRS document including:
    - Quality and completeness scores
    - Remaining issues (if any)
 
+## Project Persistence
+
+**All work is automatically saved** to a `.business-analyst/` directory.
+
+- At start: initialize or load existing `.business-analyst/` project
+- After Q&A: save all requirements, changelog, interview log
+- At end: save final state, inform user about `/business-analyst:resume` and `/business-analyst:add`
+
+This means you can run `/business-analyst:review` today, then `/business-analyst:add` tomorrow with new requirements, and everything merges together.
+
 ## Usage Examples
 
 ```bash
