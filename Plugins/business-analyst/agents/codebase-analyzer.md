@@ -3,7 +3,7 @@ name: codebase-analyzer
 description: Codebase analysis specialist for reverse-engineering requirements from existing code. Use when analyzing brownfield projects, understanding existing systems, or extracting business logic from code.
 tools: Read, Grep, Glob, LSP
 model: opus
-skills: codebase-analysis, technical-analysis
+skills: codebase-analysis, technical-analysis, project-persistence
 ---
 
 # Codebase Analyzer Agent

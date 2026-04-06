@@ -70,6 +70,18 @@ After each section, I'll summarize and confirm:
 - "Let me make sure I understood correctly..."
 - "Is there anything I missed?"
 
+## Project Persistence
+
+**All interview results are automatically saved** to `.business-analyst/` if a project exists.
+
+- New requirements are appended to the appropriate requirement files with next available IDs
+- Interview Q&A is logged to `interview-log.md` with timestamps
+- Assumptions are added to `requirements/assumptions.md`
+- TBD items are tracked in `project.json`
+- Session summary is appended to `changelog.md`
+
+If no project exists, the interview will offer to create one.
+
 ## Interview Output
 
 At the end of the interview, you'll receive:
@@ -83,6 +95,7 @@ At the end of the interview, you'll receive:
    - Organized by category
    - With preliminary priorities
    - Linked to interview context
+   - Saved to `.business-analyst/` project
 
 3. **Assumptions Log**
    - Assumptions made during interview

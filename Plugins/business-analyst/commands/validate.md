@@ -312,15 +312,27 @@ The validator helps maintain quality by:
 - Ensuring stakeholder confirmation
 - Maintaining documentation standards
 
+## Project Persistence
+
+### Loading from Saved Project
+If a `.business-analyst/` directory exists, the validator automatically reads all persisted requirements, risks, data dictionary, and traceability from it. This is the preferred mode — it validates the full accumulated state of the project.
+
+### Saving Validation Results
+After validation:
+1. Update `validation-history.md` with the new validation run (date, scores, issue count)
+2. Update `project.json` validation section (lastRun, completeness, quality, status, openIssues)
+3. Append validation summary to `changelog.md`
+
+This means `/business-analyst:status` will always show the latest validation scores.
+
 ## Getting Started
 
 What would you like me to validate?
 
-1. An SRS document generated in this conversation?
-2. A requirements list we've been building?
-3. Findings from analysis we've conducted?
-4. A specific file or document you can point me to?
+1. **Saved project** — If `.business-analyst/` exists, I'll validate everything in it
+2. A requirements list we've been building in this conversation
+3. A specific file or document you can point me to
 
-Or just say "validate" and I'll check everything we've discussed so far.
+Or just say "validate" and I'll check the saved project state, or everything we've discussed if no project exists.
 
 After validation, I will generate structured feedback that can be directly processed to improve the requirements.

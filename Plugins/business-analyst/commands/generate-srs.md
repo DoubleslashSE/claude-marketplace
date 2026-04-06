@@ -14,16 +14,19 @@ This command compiles all gathered requirements, analysis findings, and stakehol
 
 ### From Saved Project (preferred)
 If a `.business-analyst/` directory exists, the SRS is generated from all persisted state:
+- `project.json` → Document metadata, version, counters
+- `stakeholders.md` → Section 2.3, Appendix G (RACI matrix)
 - `requirements/functional.md` → Section 3.2
 - `requirements/non-functional.md` → Section 3.3
 - `requirements/constraints.md` → Section 2.4, 3.4
 - `requirements/assumptions.md` → Section 2.5
 - `requirements/use-cases.md` → Section 3.2 (detailed flows)
-- `stakeholders.md` → Section 2.3
 - `risk-register.md` → Appendix D
 - `data-dictionary.md` → Appendix E
 - `traceability.md` → Appendix C
-- `project.json` → Document metadata, version, counters
+- `interview-log.md` → Section 1.4 (References), inform glossary
+- `validation-history.md` → Appendix H (supporting info)
+- `changelog.md` → Appendix H (revision history)
 
 This means you can gather requirements over days or weeks using `/add`, `/review`, `/resume`, etc., then run `/generate-srs` at any point to produce the full document from everything accumulated so far.
 
@@ -44,7 +47,7 @@ If any of these are missing, I'll help gather them or note them as TBD in the do
 
 ## Document Structure
 
-The SRS will follow IEEE 830 standard:
+The SRS will follow IEEE 830 standard with extended appendices:
 
 ```
 1. Introduction
@@ -66,12 +69,17 @@ The SRS will follow IEEE 830 standard:
    3.2 Functional Requirements
    3.3 Non-Functional Requirements
    3.4 Design Constraints
-   3.5 Software System Attributes
+   3.5 Other Requirements (incl. UI Specifications)
 
-4. Appendices
+Appendices
    A. Glossary
    B. Analysis Models
    C. Requirements Traceability Matrix
+   D. Risk Register
+   E. Data Dictionary
+   F. Acceptance Test Strategy
+   G. RACI Matrix
+   H. Supporting Information (sign-off, change management, baselines)
 ```
 
 ## Generation Process

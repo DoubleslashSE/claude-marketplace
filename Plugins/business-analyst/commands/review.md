@@ -150,7 +150,16 @@ After Q&A, consolidate everything:
 6. **Document risks** identified during review
 7. **Build RACI matrix** if stakeholders were identified
 
-### Step 5: Validation
+### Step 5: Save State
+
+Save all consolidated requirements to `.business-analyst/`:
+1. Write requirements to the appropriate files (functional.md, non-functional.md, etc.)
+2. Update `project.json` counters and session log
+3. Save risk register, data dictionary, traceability entries
+4. Append to changelog.md and interview-log.md
+5. Inform user: "All requirements saved. You can add more later with `/business-analyst:add`."
+
+### Step 6: Validation
 
 Run the full validation suite on the consolidated requirements:
 - Completeness score
@@ -158,11 +167,20 @@ Run the full validation suite on the consolidated requirements:
 - Consistency check
 - Traceability check
 
-If score < 90%, present remaining gaps and offer another Q&A round.
+If score < 90%, present remaining gaps and offer another Q&A round or suggest returning later.
 
-### Step 6: SRS Generation
+### Step 7: Offer SRS Generation (optional)
 
-Generate the complete SRS document including:
+Do NOT auto-generate the SRS. Instead, offer the choice:
+
+> "Your requirements are saved and validated. You can:
+> 1. **Generate the SRS now** — `/business-analyst:generate-srs`
+> 2. **Add more requirements later** — `/business-analyst:add`
+> 3. **Come back another day** — `/business-analyst:resume` to continue
+>
+> What would you like to do?"
+
+If the user chooses to generate, produce the complete SRS document including:
 - All IEEE 830 sections
 - Requirements from original document + Q&A session
 - Risk register

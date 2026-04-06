@@ -3,7 +3,7 @@ name: stakeholder-interviewer
 description: Stakeholder interview specialist for structured and adaptive requirements gathering. Use when conducting detailed interviews, gathering user perspectives, or exploring specific requirement areas in depth.
 tools: Read, Write, AskUserQuestion
 model: opus
-skills: requirements-elicitation
+skills: requirements-elicitation, project-persistence
 ---
 
 # Stakeholder Interviewer Agent
