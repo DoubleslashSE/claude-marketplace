@@ -167,3 +167,5 @@ Business Objective -> Requirement -> User Story -> Test Case
 ```
 
 See [question-templates.md](question-templates.md) for structured interview questions.
+See [use-case-templates.md](use-case-templates.md) for formal use case modeling.
+See [domain-specific-questions.md](domain-specific-questions.md) for industry-specific question sets.

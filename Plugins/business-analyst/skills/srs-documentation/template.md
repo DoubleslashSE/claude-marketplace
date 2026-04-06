@@ -331,6 +331,31 @@ This document is organized as follows:
 
 {Legal and compliance requirements}
 
+### 3.5.4 User Interface Specifications
+
+{Include or reference UI specifications when the system has a user interface}
+
+#### User Journey Maps
+For each primary user class, document the end-to-end journey:
+
+| Step | User Action | System Response | Emotional State | Pain Points |
+|------|-------------|-----------------|-----------------|-------------|
+| 1 | {Action} | {Response} | {e.g., Confident} | {If any} |
+
+#### Screen/View Inventory
+
+| Screen ID | Name | Purpose | User Class | Related FRs |
+|-----------|------|---------|------------|-------------|
+| SCR-001 | {Name} | {Purpose} | {User class} | FR-001, FR-002 |
+
+#### Information Architecture
+- Navigation structure and hierarchy
+- Content organization principles
+- Search and findability approach
+
+#### Wireframe References
+{Reference wireframe documents or tools. Describe key layouts in text when visual wireframes are not available.}
+
 ---
 
 # Appendix A: Glossary
@@ -383,20 +408,127 @@ This document is organized as follows:
 
 ---
 
-# Appendix D: Supporting Information
+# Appendix D: Risk Register
 
-## D.1 Stakeholder Sign-Off
+## D.1 Risk Summary
+
+| Total Risks | Critical | High | Medium | Low |
+|-------------|----------|------|--------|-----|
+| {N} | {N} | {N} | {N} | {N} |
+
+## D.2 Risk Entries
+
+### RISK-001: {Risk Title}
+
+| Attribute | Value |
+|-----------|-------|
+| **Category** | {Technical / Business / Regulatory / Operational / External} |
+| **Related Requirements** | {FR-XXX, NFR-YYY} |
+| **Likelihood** | {1-5} |
+| **Impact** | {1-5} |
+| **Risk Score** | {L x I} |
+| **Risk Level** | {Critical / High / Medium / Low} |
+| **Mitigation** | {Strategy} |
+| **Owner** | {Person} |
+| **Status** | {Open / Mitigating / Accepted / Closed} |
+
+{Repeat for each risk}
+
+See [risk-register.md](risk-register.md) for full risk register guidance.
+
+---
+
+# Appendix E: Data Dictionary
+
+## E.1 Data Element Summary
+
+| ID | Name | Type | Required | Sensitivity |
+|----|------|------|----------|-------------|
+| DE-001 | {Element} | {Type} | {Yes/No} | {Level} |
+
+## E.2 Detailed Data Elements
+
+{See data-dictionary.md for full template per element}
+
+---
+
+# Appendix F: Acceptance Test Strategy
+
+## F.1 Test Approach Summary
+
+| Test Level | Scope | Approach |
+|------------|-------|----------|
+| Functional Acceptance | All FRs | Feature + workflow testing |
+| Non-Functional Acceptance | All NFRs | Load, security, usability testing |
+| Integration Acceptance | All integrations | Contract + end-to-end testing |
+| User Acceptance (UAT) | Business validation | Stakeholder scenario testing |
+
+## F.2 Entry/Exit Criteria
+
+See [acceptance-test-strategy.md](acceptance-test-strategy.md) for full strategy.
+
+---
+
+# Appendix G: RACI Matrix
+
+## G.1 Stakeholder Decision Authority
+
+| Decision Area | {Stakeholder 1} | {Stakeholder 2} | {Stakeholder 3} | {Technical Lead} |
+|---------------|-----------------|-----------------|-----------------|-----------------|
+| Requirements Approval | A | R | C | I |
+| Priority Decisions | A | R | C | I |
+| Technical Decisions | C | I | I | A |
+| Scope Changes | A | R | C | C |
+| Conflict Resolution | A | R | C | C |
+
+**Legend**: R = Responsible, A = Accountable, C = Consulted, I = Informed
+
+## G.2 Conflict Resolution Protocol
+
+When stakeholders disagree on requirements:
+1. Document the conflicting positions
+2. Identify the Accountable person per RACI matrix
+3. Present options with impact analysis
+4. Accountable person makes final decision
+5. Document the decision and rationale
+
+---
+
+# Appendix H: Supporting Information
+
+## H.1 Stakeholder Sign-Off
 
 | Stakeholder | Role | Signature | Date |
 |-------------|------|-----------|------|
 | {NAME} | {ROLE} | _________ | {DATE} |
 
-## D.2 Change Request Process
+## H.2 Change Request Process
 
 {Description of how changes to this SRS are managed}
 
-## D.3 Open Issues
+### Change Impact Analysis Template
+
+| Field | Value |
+|-------|-------|
+| Change Request ID | CR-{XXX} |
+| Requested By | {Name} |
+| Description | {What is changing} |
+| Requirements Affected | {FR-XXX, NFR-YYY} |
+| Impact on Schedule | {Assessment} |
+| Impact on Cost | {Assessment} |
+| Risk Impact | {New risks or changed risk levels} |
+| Recommendation | {Accept / Reject / Defer} |
+| Decision | {Outcome and rationale} |
+
+## H.3 Open Issues
 
 | Issue ID | Description | Owner | Status |
 |----------|-------------|-------|--------|
 | {ISSUE_ID} | {DESCRIPTION} | {OWNER} | {STATUS} |
+
+## H.4 Requirements Baseline
+
+| Baseline | Date | Version | Description |
+|----------|------|---------|-------------|
+| Initial | {DATE} | 1.0 | First approved baseline |
+| {Name} | {DATE} | {X.X} | {Changes included} |

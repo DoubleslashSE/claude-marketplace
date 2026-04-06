@@ -5,10 +5,13 @@ A comprehensive Senior Business Analyst plugin that helps gather requirements, a
 ## Features
 
 - **Objective-Driven Analysis**: Provide upfront context about WHY you're analyzing, and the entire workflow focuses accordingly
-- **Requirements Gathering**: Structured and adaptive interview techniques
-- **Codebase Analysis**: Reverse-engineer requirements from existing code
-- **SRS Generation**: IEEE 830 compliant Software Requirements Specification
+- **Requirements Gathering**: Structured and adaptive interview techniques with domain-specific question sets
+- **Use Case Modeling**: Formal use cases for complex multi-step interactions
+- **Codebase Analysis**: Reverse-engineer requirements from existing code (supports C#, Java, Python, Go, Rust, Ruby, TypeScript)
+- **SRS Generation**: IEEE 830 compliant Software Requirements Specification with risk register, data dictionary, and test strategy
+- **Risk Analysis**: Structured risk identification, assessment, and mitigation planning
 - **Validation Feedback Loop**: Built-in verification and quality checks
+- **RACI & Conflict Resolution**: Stakeholder decision authority matrix with conflict resolution protocol
 - **Dual Context Support**: Greenfield and brownfield workflows
 
 ## Objective-Driven Workflow
@@ -57,6 +60,8 @@ claude --plugin-dir ./Plugins/business-analyst
 ### requirements-elicitation
 Requirements gathering techniques including:
 - Structured question templates by category
+- Domain-specific question sets (healthcare, fintech, e-commerce, SaaS, government, etc.)
+- Formal use case modeling templates
 - Adaptive questioning techniques
 - Gap identification methods
 - MoSCoW prioritization
@@ -74,6 +79,9 @@ SRS writing guidance including:
 - Writing guidelines for clarity
 - Validation checklists (SMART + INVEST criteria)
 - Traceability matrix patterns
+- Risk register templates and guidance
+- Data dictionary templates
+- Acceptance test strategy framework
 
 ### technical-analysis
 Technical analysis capabilities:
@@ -292,14 +300,19 @@ business-analyst/
 ├── skills/
 │   ├── requirements-elicitation/
 │   │   ├── SKILL.md
-│   │   └── question-templates.md
+│   │   ├── question-templates.md
+│   │   ├── use-case-templates.md
+│   │   └── domain-specific-questions.md
 │   ├── codebase-analysis/
 │   │   ├── SKILL.md
 │   │   └── patterns.md
 │   ├── srs-documentation/
 │   │   ├── SKILL.md
 │   │   ├── template.md
-│   │   └── checklists.md
+│   │   ├── checklists.md
+│   │   ├── risk-register.md
+│   │   ├── data-dictionary.md
+│   │   └── acceptance-test-strategy.md
 │   └── technical-analysis/
 │       ├── SKILL.md
 │       └── integration-patterns.md

@@ -120,21 +120,88 @@ Always pause to confirm with the user:
 4. After capturing business rules: "Did I capture these correctly?"
 5. After prioritization: "Does this prioritization look right?"
 
+## Risk Identification
+
+For each significant requirement, assess associated risks:
+
+1. **Ask**: "What could go wrong with this requirement?"
+2. **Assess**: Likelihood (1-5) and Impact (1-5)
+3. **Plan**: Mitigation strategy and contingency
+4. **Document**: Using RISK-XXX format in the risk register
+
+See [risk-register.md](risk-register.md) for templates and guidance.
+
+## Use Case Modeling
+
+For complex multi-step interactions, supplement user stories with formal use cases:
+
+1. **Identify actors**: Who/what initiates and participates?
+2. **Document main flow**: Step-by-step actor-system interaction
+3. **Capture alternative flows**: Valid variations of the main path
+4. **Capture exception flows**: Error scenarios and recovery
+5. **Define pre/postconditions**: System state before and after
+
+See [use-case-templates.md](use-case-templates.md) for templates and guidance.
+
+## Data Dictionary
+
+For each data element referenced in requirements:
+
+1. **Define**: Business meaning, data type, format
+2. **Constrain**: Valid values, ranges, lengths
+3. **Classify**: Sensitivity level (PII, PCI, etc.)
+4. **Trace**: Which requirements reference this element
+
+See [data-dictionary.md](data-dictionary.md) for templates.
+
+## Estimation Support
+
+Provide preliminary complexity assessment for each requirement:
+
+| Size | Description | Typical Effort |
+|------|-------------|----------------|
+| XS | Trivial change, single component | < 1 day |
+| S | Small feature, 1-2 components | 1-3 days |
+| M | Medium feature, multiple components | 3-5 days |
+| L | Large feature, cross-cutting | 1-2 weeks |
+| XL | Epic-level, needs decomposition | 2+ weeks |
+
+Note: These are relative sizing estimates, not commitments. They help stakeholders understand implementation scope.
+
+## RACI Matrix
+
+For each decision area, establish clear authority:
+- **R**esponsible: Does the work
+- **A**ccountable: Final decision maker (exactly one per decision)
+- **C**onsulted: Provides input before decision
+- **I**nformed: Notified after decision
+
+This is critical for resolving conflicting requirements between stakeholders.
+
 ## Output Artifacts
 
 ### 1. Stakeholder Register
-List of all stakeholders with roles, interests, and influence levels.
+List of all stakeholders with roles, interests, influence levels, and RACI assignments.
 
 ### 2. Requirements List
 Comprehensive list of all requirements with IDs, descriptions, and priorities.
 
-### 3. Requirements Traceability Matrix
-Mapping from business objectives to requirements.
+### 3. Use Case Catalog
+Formal use cases for complex multi-step interactions.
 
-### 4. Assumptions Log
+### 4. Requirements Traceability Matrix
+Mapping from business objectives to requirements to test cases.
+
+### 5. Risk Register
+Identified risks with assessment, mitigation, and requirement linkage.
+
+### 6. Data Dictionary
+Detailed definition of all data elements referenced in requirements.
+
+### 7. Assumptions Log
 Documented assumptions with impact assessment.
 
-### 5. Gap Analysis (Brownfield)
+### 8. Gap Analysis (Brownfield)
 Identified gaps between current and desired capabilities.
 
 ## Interaction Guidelines

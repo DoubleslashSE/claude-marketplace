@@ -173,8 +173,8 @@ I will pause for your confirmation at:
 
 ## Expected Outputs
 
-1. **Stakeholder Register**
-   - Complete list with roles and interests
+1. **Stakeholder Register & RACI Matrix**
+   - Complete list with roles, interests, and decision authority
 
 2. **Scope Document**
    - In/out of scope items
@@ -182,17 +182,27 @@ I will pause for your confirmation at:
    - Future phases outline
 
 3. **Requirements Inventory**
-   - Functional requirements (user stories)
+   - Functional requirements (user stories + use cases for complex flows)
    - Non-functional requirements
    - Constraints and assumptions
+   - Preliminary complexity estimates (XS/S/M/L/XL)
 
-4. **Prioritized Backlog**
+4. **Risk Register**
+   - Identified risks with assessment and mitigation
+
+5. **Data Dictionary**
+   - Data elements with types, formats, validation rules
+
+6. **Prioritized Backlog**
    - MoSCoW categorized requirements
 
-5. **SRS Document**
-   - IEEE 830 compliant specification
+7. **SRS Document**
+   - IEEE 830 compliant specification with all appendices
 
-6. **Validation Report**
+8. **Acceptance Test Strategy**
+   - Test approach and entry/exit criteria
+
+9. **Validation Report**
    - Quality and completeness assessment
 
 ## Getting Started

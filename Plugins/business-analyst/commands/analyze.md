@@ -198,28 +198,45 @@ The workflow will pause for user confirmation at these points:
 
 At the end of this workflow, you will have:
 
-1. **Stakeholder Register**
-   - List of all stakeholders with roles and interests
+1. **Stakeholder Register & RACI Matrix**
+   - List of all stakeholders with roles, interests, and decision authority
+   - Clear conflict resolution protocol
 
 2. **Requirements Inventory**
    - Comprehensive list of functional requirements
+   - Formal use cases for complex interactions
    - Non-functional requirements (FURPS+)
    - Constraints and assumptions
+   - Preliminary complexity estimates (XS/S/M/L/XL)
 
 3. **Codebase Analysis Report** (brownfield only)
    - Domain model documentation
    - Business rules inventory
    - Integration map
 
-4. **Traceability Matrix**
+4. **Risk Register**
+   - Identified risks with likelihood/impact assessment
+   - Mitigation strategies linked to requirements
+
+5. **Data Dictionary**
+   - All data elements with types, formats, validation rules
+   - Sensitivity classification
+
+6. **Traceability Matrix**
    - Business objectives to requirements mapping
+   - Requirements to test cases mapping
    - Requirement dependencies
 
-5. **SRS Document**
+7. **SRS Document**
    - IEEE 830 compliant specification
+   - Includes risk register, data dictionary, RACI, test strategy appendices
    - Ready for stakeholder approval
 
-6. **Validation Report**
+8. **Acceptance Test Strategy**
+   - Test approach per level (functional, NFR, integration, UAT)
+   - Entry/exit criteria
+
+9. **Validation Report**
    - Quality and completeness scores
    - Issues and recommendations
 

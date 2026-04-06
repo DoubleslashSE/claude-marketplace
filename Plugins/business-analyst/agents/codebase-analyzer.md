@@ -150,9 +150,28 @@ Search: "[Table(" or "DbSet<"
 Search: "@Entity" or "@Table"
 Search: "extends.*Entity"
 
-# TypeScript
+# TypeScript / JavaScript
 Search: "interface.*{" or "type.*="
-Search: "@Entity()" decorator
+Search: "@Entity()" decorator (TypeORM)
+Search: "Schema({" or "model(" (Mongoose)
+Search: "define(" or "Model.init(" (Sequelize)
+
+# Python
+Search: "class.*Model" or "class.*(Base)" (SQLAlchemy)
+Search: "class.*models.Model" (Django)
+Search: "@dataclass" or "class.*(BaseModel)" (Pydantic)
+
+# Go
+Search: "type.*struct {" (domain structs)
+Search: "gorm.Model" or "bun.BaseModel" (ORM models)
+
+# Rust
+Search: "struct.*{" with "#[derive(" attributes
+Search: "#[diesel(" or "#[sea_orm(" (ORM models)
+
+# Ruby
+Search: "class.*< ApplicationRecord" or "class.*< ActiveRecord::Base"
+Search: "has_many|belongs_to|has_one" (associations)
 ```
 
 ### Validation Rules
@@ -165,30 +184,79 @@ Search: "AbstractValidator<|RuleFor("
 
 # Custom validation
 Search: "throw.*Exception|Validate|IsValid"
+
+# Python
+Search: "validator|field_validator|@validates" (Pydantic / SQLAlchemy)
+Search: "clean|validate_|ValidationError" (Django)
+
+# Go
+Search: "validate:\"" or "binding:\"" (gin/validator tags)
+
+# Rust
+Search: "#[validate(" (validator crate)
+
+# Ruby
+Search: "validates|validate|validates_presence_of" (ActiveModel)
+
+# TypeScript
+Search: "@IsNotEmpty|@IsEmail|@Min|@Max" (class-validator)
+Search: "z.string()|z.number()|z.object(" (Zod)
 ```
 
 ### Business Logic
 ```
-# Service classes
+# Service classes (C# / Java)
 Search: "class.*Service|class.*Handler|class.*UseCase"
 
-# Calculations
+# Python
+Search: "class.*Service|class.*UseCase|def.*calculate|def.*process"
+
+# Go
+Search: "type.*Service struct|func.*Handler("
+
+# Rust
+Search: "impl.*Service|fn.*calculate|fn.*process"
+
+# Ruby
+Search: "class.*Service|class.*Interactor|class.*Command"
+
+# TypeScript / JavaScript
+Search: "class.*Service|class.*UseCase" or "export.*function.*handle"
+
+# Calculations (all languages)
 Search: "Calculate|Compute|Total|Sum|Discount|Tax"
 
 # State management
 Search: "enum.*Status|enum.*State|StateMachine"
+Search: "status.*=|state.*=" (state transitions)
 ```
 
 ### Integrations
 ```
-# HTTP clients
-Search: "HttpClient|RestClient|WebClient|fetch("
+# HTTP clients (C# / Java)
+Search: "HttpClient|RestClient|WebClient"
 
-# Message queues
+# JavaScript / TypeScript
+Search: "fetch(|axios\.|got(|ky\." 
+
+# Python
+Search: "requests\.|httpx\.|aiohttp\.|urllib"
+
+# Go
+Search: "http.NewRequest|http.Get|http.Post|resty\."
+
+# Rust
+Search: "reqwest::|hyper::|surf::"
+
+# Ruby
+Search: "Net::HTTP|HTTParty|Faraday|RestClient"
+
+# Message queues (all)
 Search: "IPublisher|IConsumer|Producer|Consumer|EventBus"
+Search: "kafka|rabbitmq|amqp|nats|sqs|pubsub|celery"
 
 # External SDKs
-Search: "using.*SDK|import.*client"
+Search: "using.*SDK|import.*client|require.*client"
 ```
 
 ## Output Format

@@ -1,7 +1,7 @@
 ---
 name: validator
 description: Validation and quality assurance specialist for verifying requirements artifacts. Use to validate SRS documents, check requirement quality, ensure completeness, and provide feedback on work products.
-tools: Read, Grep, Glob, AskUserQuestion
+tools: Read, Write, Edit, Grep, Glob, AskUserQuestion
 model: opus
 skills: srs-documentation
 ---
@@ -74,6 +74,10 @@ Check all IEEE 830 sections:
 - [ ] Glossary complete
 - [ ] Analysis models included
 - [ ] Traceability matrix present
+- [ ] Risk register populated
+- [ ] Data dictionary covers all data elements
+- [ ] Acceptance test strategy included
+- [ ] RACI matrix defines decision authority
 ```
 
 ### Requirement Quality Validation (SMART)
@@ -86,7 +90,7 @@ For each requirement, verify:
 | **M**easurable | Are there quantifiable acceptance criteria? | |
 | **A**chievable | Is it technically feasible? | |
 | **R**elevant | Does it trace to a business objective? | |
-| **T**estable | Can test cases be written? | |
+| **T**estable | Can test cases be written? Is there timeline context? | |
 
 ### User Story Quality Validation (INVEST)
 

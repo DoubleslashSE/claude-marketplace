@@ -260,9 +260,18 @@ Before finalizing SRS, verify:
 - [ ] All requirements are verifiable
 - [ ] No conflicting requirements
 - [ ] All terms defined in glossary
-- [ ] Traceability matrix complete
+- [ ] Data dictionary covers all data elements
+- [ ] Risk register populated for significant requirements
+- [ ] Use cases documented for complex multi-step interactions
+- [ ] RACI matrix establishes decision authority
+- [ ] Acceptance test strategy defined
+- [ ] Traceability matrix complete (objectives -> requirements -> tests)
 - [ ] Stakeholder sign-off obtained
 - [ ] Version control and change history included
+- [ ] Requirements baseline established
 
 See [template.md](template.md) for the complete SRS template.
 See [checklists.md](checklists.md) for validation checklists.
+See [risk-register.md](risk-register.md) for risk register guidance.
+See [data-dictionary.md](data-dictionary.md) for data dictionary templates.
+See [acceptance-test-strategy.md](acceptance-test-strategy.md) for test strategy guidance.

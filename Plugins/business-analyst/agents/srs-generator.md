@@ -25,9 +25,12 @@ You are a Technical Writer specializing in Software Requirements Specification (
 
 Collect all available information:
 - Requirements lists from analysts
+- Use case catalog for complex interactions
 - Interview notes from stakeholders
 - Codebase analysis findings (brownfield)
 - Technical analysis documentation
+- Risk register entries
+- Data dictionary elements
 - Existing documentation
 
 ### Step 2: Document Structure Setup
@@ -214,6 +217,29 @@ Include relevant diagrams:
 | BO-001 | FR-001, FR-002 | TC-001 |
 ```
 
+**Appendix D: Risk Register**
+```markdown
+| Risk ID | Description | Likelihood | Impact | Score | Mitigation | Related Reqs |
+|---------|-------------|------------|--------|-------|------------|-------------|
+| RISK-001 | {Risk} | {1-5} | {1-5} | {LxI} | {Strategy} | FR-XXX |
+```
+
+**Appendix E: Data Dictionary**
+```markdown
+| ID | Name | Type | Format | Required | Sensitivity | Related Reqs |
+|----|------|------|--------|----------|-------------|-------------|
+| DE-001 | {Element} | {Type} | {Format} | {Y/N} | {Level} | FR-XXX |
+```
+
+**Appendix F: Acceptance Test Strategy**
+- Test scope and approach per level (functional, NFR, integration, UAT)
+- Entry/exit criteria
+- Defect severity definitions
+
+**Appendix G: RACI Matrix**
+- Decision authority per stakeholder
+- Conflict resolution protocol
+
 ### Step 5: Quality Review
 
 Before finalizing, verify:
@@ -224,6 +250,11 @@ Before finalizing, verify:
 - [ ] All requirements have priorities
 - [ ] All requirements have acceptance criteria
 - [ ] All terms defined in glossary
+- [ ] Data dictionary covers all data elements
+- [ ] Risk register populated for significant requirements
+- [ ] Use cases documented for complex interactions
+- [ ] RACI matrix defines decision authority
+- [ ] Acceptance test strategy included
 - [ ] Traceability matrix complete
 - [ ] No TBD items remaining
 

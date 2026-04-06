@@ -44,7 +44,13 @@
 - [ ] Glossary complete
 - [ ] Analysis models included (DFD, ERD, etc.)
 - [ ] Traceability matrix complete
+- [ ] Risk register populated with identified risks
+- [ ] Data dictionary covers all data elements
+- [ ] Acceptance test strategy defined
+- [ ] RACI matrix establishes decision authority
 - [ ] Stakeholder sign-off section included
+- [ ] Change management process documented
+- [ ] Requirements baseline established
 
 ---
 
@@ -73,7 +79,9 @@ For each requirement, verify:
 - [ ] Provides value to stakeholders
 - [ ] Aligned with project goals
 
-### T - Time-bound
+### T - Testable / Time-bound
+- [ ] Can be verified through testing
+- [ ] Test method is identifiable
 - [ ] Has timeline context
 - [ ] Priority is assigned
 - [ ] Phase/release is identified
