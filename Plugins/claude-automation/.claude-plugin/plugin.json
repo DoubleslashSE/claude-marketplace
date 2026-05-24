@@ -1,0 +1,9 @@
+{
+  "name": "claude-automation",
+  "description": "Automation tooling for Claude Code: skills for generating autonomous scripts, agent harnesses, and orchestration patterns.",
+  "version": "1.0.0",
+  "author": {
+    "name": "DoubleslashSE",
+    "email": "info@doubleslash.se"
+  }
+}

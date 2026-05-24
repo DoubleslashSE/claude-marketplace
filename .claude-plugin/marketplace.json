@@ -47,6 +47,12 @@
       "source": "./Plugins/flow-workflow",
       "description": "Lightweight meta-orchestrator that leverages your plugin ecosystem through capability-based routing, with simplified commands (5), consolidated state files (2), and smart continuation",
       "version": "2.0.4"
+    },
+    {
+      "name": "claude-automation",
+      "source": "./Plugins/claude-automation",
+      "description": "Automation tooling for Claude Code: skills for generating autonomous scripts, agent harnesses, and orchestration patterns.",
+      "version": "1.0.0"
     }
   ]
 }

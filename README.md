@@ -7,6 +7,7 @@ A collection of plugins for [Claude Code](https://claude.com/claude-code) that e
 | Plugin | Description | Version |
 |--------|-------------|---------|
 | [business-analyst](./Plugins/business-analyst) | Senior Business Analyst for requirements gathering, codebase analysis, stakeholder interviews, and SRS document generation | 1.1.0 |
+| [claude-automation](./Plugins/claude-automation) | Automation tooling for Claude Code: autonomous script builder and related harnesses | 1.0.0 |
 | [dotnet-developer](./Plugins/dotnet-developer) | General .NET development workflow with automated validation through build, test, and static analysis quality gates | 1.0.0 |
 | [dotnet-tdd](./Plugins/dotnet-tdd) | Test-Driven Development for .NET following TDD, SOLID, DRY, KISS, YAGNI, and CQS principles | 1.2.2 |
 | [flow-workflow](./Plugins/flow-workflow) | Lightweight meta-orchestrator that leverages your plugin ecosystem through capability-based routing | 2.0.4 |
@@ -27,6 +28,7 @@ claude --plugin-dir ./Plugins/dotnet-tdd
 ```
 Plugins/
 ├── business-analyst/        # Requirements & SRS generation
+├── claude-automation/       # Autonomous script builder & harnesses
 ├── dotnet-developer/        # .NET development workflow
 ├── dotnet-tdd/              # .NET TDD plugin
 ├── flow-workflow/           # Meta-orchestrator for plugin routing
