@@ -27,8 +27,8 @@ Required ingredients:
 - Adversarial framing ("Your job is to find problems, not to approve")
 - Specific things to look for (bugs, security, tests, plan adherence, scope creep)
 - The stated intent (so it can check adherence)
-- The diff
-- Output contract — numbered list of concerns
+- The diff (use `gh pr diff "$PR_NUMBER"` once the PR is open)
+- Output contract — GitHub-flavored markdown with a numbered list of concerns, with file paths and line numbers where possible (the bash script posts this verbatim via `gh pr comment`)
 
 Variants by Q5 choice:
 
@@ -52,16 +52,34 @@ Required ingredients:
 - The reviewer notes
 - The three-way verdict instruction: ADDRESS / DEFER / REJECT
 - What to do per verdict:
-  - ADDRESS — make additional code changes now
+  - ADDRESS — make additional code changes now (the bash script will commit + push them as a follow-up commit on the same PR)
   - DEFER — add to the ledger's Suggested section
   - REJECT — explain why in the output
-- Output contract — `SUMMARY:` line
+- Output contract — GitHub-flavored markdown summarizing the verdict per-note, ending with a `SUMMARY:` line (the bash script posts this verbatim to the PR via `gh pr comment`)
 
 Anti-patterns to avoid:
 - Auto-accepting all reviewer notes. The reviewer is adversarial — accepting everything would cause scope creep and over-engineering.
 - Letting the verdict step skip the ledger update. Deferred items must land in the ledger or they're lost.
+- Free-form verdict output. The verdict must emit structured `### Addressed` / `### Deferred` / `### Rejected` sections so the distiller (see #4) can parse it. Free-form prose breaks the learning loop.
 
-## Tone of all three prompts
+## 4. Distiller prompt (the meta-learner)
+
+Runs every `LEARN_EVERY` runs (default 5). Reads the last 5 entries of `REVIEW_HISTORY.md` and updates `LEARNINGS.md`. The implementor reads `LEARNINGS.md` at the start of every run, so the loop self-corrects: patterns the reviewer keeps catching get internalized.
+
+Required ingredients:
+- Restate that the input is reviewer + verdict history, and the signal of interest is the `### Addressed` sections (notes the implementor agreed with — those reveal what the implementor consistently misses).
+- The last `LEARN_EVERY` history entries.
+- The current `LEARNINGS.md` (so the distiller can refine/age, not just append).
+- Rules: terse imperative voice, threshold (pattern in ≥2 runs OR a single serious issue), refine wording, prune stale, cap at ~20 lines.
+- Output contract: emit the FULL new contents of `LEARNINGS.md` to stdout (the bash redirects it to the file). End with a `_Last updated: <iso> (run #N)_` trailer.
+
+Anti-patterns to avoid:
+- Treating DEFER/REJECT as signal. Those are noise for this purpose — only `### Addressed` items count.
+- Letting the file grow unbounded. Force pruning when over the cap.
+- Vague learnings ("be careful with tests"). Reject anything that wouldn't help the implementor make a different decision next run.
+- Distilling on every run. The whole point is amortization — a single Addressed note isn't a pattern.
+
+## Tone of all four prompts
 
 Be terse and operational. These are agents doing work, not assistants helping a human. Don't say "please" or "if you would". Say what to do.
 
