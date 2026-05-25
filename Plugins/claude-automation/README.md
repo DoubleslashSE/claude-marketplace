@@ -25,7 +25,8 @@ The skill walks through a short interview (trigger model, work selection, comple
 Every script the skill produces includes:
 
 - Strict bash (`set -euo pipefail`, `IFS=$'\n\t'`)
-- An adversarial reviewer pass (separate Claude invocation) by default
+- An adversarial reviewer pass (separate Claude invocation) by default — its notes and the implementor's verdict are posted as comments on the draft PR so a human can review them in context
+- A self-improving learnings loop — every `LEARN_EVERY` runs (default 5), a *distiller* invocation reads the recent reviewer + verdict history and updates `LEARNINGS.md` with patterns from notes the implementor actually addressed; the implementor reads `LEARNINGS.md` at the start of every run
 - Mutex/lock (sentinel label or lockfile)
 - An explicit resource manifest in the prompt
 - A markdown ledger appropriate to the mode (candidate ledger, plan checklist, or append-only journal)

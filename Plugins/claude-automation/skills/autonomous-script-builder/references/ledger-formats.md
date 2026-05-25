@@ -99,3 +99,54 @@ Conventions:
 - **Q1 = plan-driven, multiple sources** → journal only (the script's own record; plans live elsewhere)
 - **Q1 = queue-driven** → journal only (the queue is the source of truth)
 - **Q1 = event-driven** → journal only (events are the source of truth)
+
+## REVIEW_HISTORY.md (always present)
+
+Independent of mode. Append-only log of reviewer notes + implementor verdict per run. Source signal for the distiller — never edit by hand.
+
+```markdown
+# Review History
+
+## Run 2026-05-25T13:42:11+02:00 — PR #142
+
+### Reviewer notes
+
+1. The new retry path has no exponential backoff; bursts will hammer upstream.
+2. Missing test for the timeout edge case.
+
+### Implementor verdict
+
+### Addressed
+- Backoff missing — added exponential backoff with jitter (1s, 2s, 4s, capped at 30s).
+
+### Deferred
+- Timeout test — deferred to a follow-up, added to SCOUT.md Suggested.
+
+### Rejected
+- _none_
+
+SUMMARY: Added retry with backoff to log forwarder; deferred dedicated timeout test.
+```
+
+Distiller parses `### Run` markers to count runs and `### Addressed` blocks for signal.
+
+## LEARNINGS.md (always present)
+
+Distilled signal. Maintained by the distiller every `LEARN_EVERY` runs. Read by every implementor invocation.
+
+```markdown
+# Implementor Learnings
+
+_Distilled from adversarial review notes the implementor accepted (ADDRESS verdict).
+Read by every run. Updated every 5 runs._
+
+## Patterns to apply
+
+- Always add exponential backoff with jitter to new retry paths.
+- When touching shared mutable state, prefer immutable replacement over in-place mutation.
+- If a change touches the API surface, update the OpenAPI spec in the same commit.
+
+_Last updated: 2026-05-25T13:42:11+02:00 (run #15)_
+```
+
+Keep terse. The distiller is told to cap at ~20 lines.

@@ -24,7 +24,7 @@ If the user just wants a one-shot bash script with no agent loop, this skill is 
 These are invariants. Every script this skill produces includes them.
 
 1. **Strict bash** — `#!/usr/bin/env bash`, `set -euo pipefail`, `IFS=$'\n\t'`.
-2. **Adversarial reviewer is on by default.** After the implementor agent produces changes, a separate Claude Code invocation reviews the diff with an explicitly adversarial prompt. The implementor then gets the review and decides which notes to act on (it has veto power — not every note must be implemented). Only skip the reviewer if the user explicitly says "no review" and confirms.
+2. **Adversarial reviewer is on by default, and posts to the PR.** When the script opens a PR (Q9 default), the flow is: implementor commits → push → open draft PR → adversarial reviewer reads the PR diff and posts findings as a PR comment via `gh pr comment` → implementor verdict (ADDRESS / DEFER / REJECT each note, possibly with follow-up commits) is posted as a second PR comment. This way a human reviewer sees both the adversarial notes and the implementor's response in context on the PR itself, not buried in script logs. The implementor has veto power — not every note must be implemented. For no-commit or direct-to-main modes (no PR exists), the reviewer prints to stdout instead. Only skip the reviewer entirely if the user explicitly says "no review" and confirms.
 3. **Mutex/lock** — pick a strategy in the interview (sentinel label in CI, lockfile on disk for local runs). Never run two instances concurrently.
 4. **Resource manifest** — the script must explicitly tell the agent what resources exist (env vars present, API keys available, services reachable, paths to important files). Don't make the agent guess. A `cat <<EOF` block listing resources goes into the prompt.
 5. **Ledger file** — every script maintains a markdown ledger appropriate to its mode (see branches below). Append-only where possible.
@@ -32,6 +32,7 @@ These are invariants. Every script this skill produces includes them.
 7. **Companion-service awareness** — if the target system depends on a sidecar or host agent that must move in lockstep with the main deployable, the script should either deploy it too or surface the dependency loudly. Many autonomous-improvement scripts touch code that has a runtime companion; ignoring it leads to version skew.
 8. **Exit codes** — 0 = work done, 1 = error, 2 = nothing to do (clean no-op), 3 = locked (another run in progress). Schedulers and CI care about this.
 9. **Decisions record** — emit a `*.DECISIONS.md` next to the script recording which branches the interview took and why. Future maintainers (and future-you) will need this.
+10. **Learnings loop (self-improvement).** Every script maintains two extra state files: `REVIEW_HISTORY.md` (append-only — verbatim reviewer notes + implementor verdict per run) and `LEARNINGS.md` (distilled signal). Every `LEARN_EVERY` runs (default 5), a fourth Claude invocation — the *distiller* — reads the last 5 history entries and updates `LEARNINGS.md` with recurring patterns from the implementor's `### Addressed` notes. Every implementor prompt then includes `LEARNINGS.md` in its resource manifest, so the loop self-corrects over time. The verdict prompt must emit structured `### Addressed` / `### Deferred` / `### Rejected` sections so the distiller can separate signal from noise.
 
 ## The interview
 
@@ -145,20 +146,25 @@ Every generated script follows this skeleton (full template in `references/scrip
 2. Header comment: purpose, schedule, dependencies, companion services
 3. Lock acquisition (or exit 3)
 4. Pre-flight checks: required env vars, claude CLI present, git clean state
-5. Resource manifest assembly (the cat <<EOF block)
-6. Ledger read (load current state)
-7. Implementor invocation (claude -p with prompt + resource manifest + ledger excerpt)
-8. Diff capture
-9. Adversarial reviewer invocation (claude -p with diff + adversarial system prompt)
-10. Implementor verdict (claude -p — given review, decides what to change, may re-edit)
-11. Ledger update (append what was done)
-12. Commit + push + PR (per Q9)
-13. Lock release
-14. Exit with appropriate code
+5. Persistent state file init: `LEDGER_FILE`, `REVIEW_HISTORY_FILE`, `LEARNINGS_FILE` (+ `LEARN_EVERY` constant)
+6. Resource manifest assembly (the cat <<EOF block — **must include `$(cat $LEARNINGS_FILE)`**)
+7. Implementor invocation (claude -p with prompt + resource manifest + ledger excerpt + learnings)
+8. Ledger update (append what was done) — committed alongside code changes
+9. Commit + push + open draft PR (per Q9) — so the reviewer has a PR to comment on
+10. Diff capture (`gh pr diff "$PR_NUMBER"`)
+11. Adversarial reviewer invocation (claude -p with diff + adversarial system prompt) → posted to PR via `gh pr comment`
+12. Implementor verdict (claude -p — given review, decides what to change, may re-edit; emits structured `### Addressed` / `### Deferred` / `### Rejected` sections) → follow-up commit pushed if needed, verdict posted to PR via `gh pr comment`
+13. Append `### Reviewer notes` + `### Implementor verdict` block to `REVIEW_HISTORY.md`
+14. If `RUN_COUNT % LEARN_EVERY == 0`, invoke the distiller (claude -p with the last `LEARN_EVERY` history entries + current `LEARNINGS.md`); overwrite `LEARNINGS.md` with its output
+15. Commit `REVIEW_HISTORY.md` (and `LEARNINGS.md` if updated) onto the PR branch
+16. Lock release
+17. Exit with appropriate code
+
+For no-commit and direct-to-main modes (no PR exists), reviewer + verdict print to stdout instead of posting comments. The history-append + distiller steps still run.
 ```
 
 Read `references/script-template.md` for the actual bash skeleton before generating.
-Read `references/prompt-patterns.md` for the implementor and reviewer prompt templates.
+Read `references/prompt-patterns.md` for the implementor, reviewer, verdict, and distiller prompt templates.
 Read `references/ledger-formats.md` for the per-mode ledger structure.
 
 ## Things to push back on
