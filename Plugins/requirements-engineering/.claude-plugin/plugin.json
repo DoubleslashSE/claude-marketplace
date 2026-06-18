@@ -1,0 +1,7 @@
+{
+  "name": "requirements-engineering",
+  "version": "0.1.0",
+  "description": "Interactively elicit, capture, and maintain software/system requirements as a living, traceable repository: SRS documents, MADR architecture decision records, a requirements traceability DAG, and an append-only decision ledger, with a validator that enforces atomic, verifiable, traceable requirements.",
+  "author": { "name": "Motorit" },
+  "keywords": ["requirements", "srs", "adr", "traceability", "specification", "requirements-engineering"]
+}
