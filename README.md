@@ -13,6 +13,7 @@ A collection of plugins for [Claude Code](https://claude.com/claude-code) that e
 | [flow-workflow](./Plugins/flow-workflow) | Lightweight meta-orchestrator that leverages your plugin ecosystem through capability-based routing | 2.0.4 |
 | [infra](./Plugins/infra) | Infrastructure troubleshooting for diagnosing and resolving issues across GitHub Actions, Railway, Supabase, and Postgres | 1.0.0 |
 | [node-tdd](./Plugins/node-tdd) | Node.js Test-Driven Development with TypeScript support, SOLID principles, clean code practices, and functional patterns | 1.1.1 |
+| [requirements-engineering](./Plugins/requirements-engineering) | Interactively elicit and maintain software requirements as a living, traceable repository: SRS docs, MADR ADRs, a traceability DAG, and a decision ledger, with a validator enforcing atomic, verifiable requirements | 0.1.0 |
 | [workshop-facilitator](./Plugins/workshop-facilitator) | Workshop facilitation for design thinking, brainstorming, and collaborative problem-solving sessions | 1.0.1 |
 
 ## Installation
@@ -34,6 +35,7 @@ Plugins/
 ├── flow-workflow/           # Meta-orchestrator for plugin routing
 ├── infra/                   # Infrastructure troubleshooting
 ├── node-tdd/                # Node.js TDD plugin
+├── requirements-engineering/ # Requirements elicitation, SRS, ADRs & traceability
 ├── workshop-facilitator/    # Workshop facilitation
 └── [future-plugins]/
 ```

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/requirement.schema.json",
+  "title": "Requirement",
+  "description": "A single atomic, verifiable, traceable requirement.",
+  "type": "object",
+  "required": ["id", "title", "type", "statement", "priority", "status"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Z]+(-[A-Z]+)*-[0-9]{3,}$",
+      "description": "Unique, immutable, never reused. e.g. STK-001, SW-FUN-001, SW-NFR-002, IF-001, CON-001."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Short human label (not the obligation itself)."
+    },
+    "type": {
+      "type": "string",
+      "enum": ["stakeholder", "system", "functional", "nonfunctional", "interface", "constraint"]
+    },
+    "statement": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The single obligation, ideally phrased with 'shall'."
+    },
+    "rationale": { "type": "string" },
+    "priority": {
+      "type": "string",
+      "enum": ["must", "should", "could", "wont"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["proposed", "accepted", "implemented", "verified", "deprecated"]
+    },
+    "source": { "type": "string" },
+    "derived_from": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Parent requirement IDs (edges up the DAG). Required for non-stakeholder requirements."
+    },
+    "depends_on": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "conflicts_with": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "verification": {
+      "type": "object",
+      "required": ["method", "criterion"],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["test", "analysis", "inspection", "demonstration"]
+        },
+        "criterion": { "type": "string", "minLength": 1 }
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^ADR-[0-9]{3,}$" }
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
